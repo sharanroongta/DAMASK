@@ -90,7 +90,8 @@ submodule(constitutive:constitutive_plastic) plastic_dislotwin
       rho_dip, &
       gamma_sl, &
       f_tw, &
-      f_tr
+      f_tr, &
+      h_line
   end type tDislotwinState
 
   type :: tDislotwinMicrostructure
@@ -408,7 +409,7 @@ module function plastic_dislotwin_init() result(myPlasticity)
 !--------------------------------------------------------------------------------------------------
 ! allocate state arrays
     Nconstituents  = count(material_phaseAt == p) * discretization_nIPs
-    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl']) * prm%sum_N_sl &
+    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl', 'h_line  ']) * prm%sum_N_sl &
                  + size(['f_tw'])                           * prm%sum_N_tw &
                  + size(['f_tr'])                           * prm%sum_N_tr
     sizeState = sizeDotState
@@ -438,6 +439,13 @@ module function plastic_dislotwin_init() result(myPlasticity)
     stt%gamma_sl=>plasticState(p)%state(startIndex:endIndex,:)
     dot%gamma_sl=>plasticState(p)%dotState(startIndex:endIndex,:)
     plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal
+
+    startIndex = endIndex + 1
+    endIndex   = endIndex + prm%sum_N_sl
+    stt%h_line=>plasticState(p)%state(startIndex:endIndex,:)
+    dot%h_line=>plasticState(p)%dotState(startIndex:endIndex,:)
+    plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
+ 
     ! global alias
     plasticState(p)%slipRate        => plasticState(p)%dotState(startIndex:endIndex,:)
 
@@ -523,13 +531,13 @@ end function plastic_dislotwin_homogenizedC
 !--------------------------------------------------------------------------------------------------
 !> @brief Calculate plastic velocity gradient and its tangent.
 !--------------------------------------------------------------------------------------------------
-module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,instance,of)
+module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,subdt,instance,of)
 
   real(pReal), dimension(3,3),     intent(out) :: Lp
   real(pReal), dimension(3,3,3,3), intent(out) :: dLp_dMp
   real(pReal), dimension(3,3),     intent(in)  :: Mp
   integer,                         intent(in)  :: instance,of
-  real(pReal),                     intent(in)  :: T
+  real(pReal),                     intent(in)  :: T,subdt
 
   integer :: i,k,l,m,n
   real(pReal) :: &
@@ -575,7 +583,7 @@ module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,instance,of)
   Lp = 0.0_pReal
   dLp_dMp = 0.0_pReal
 
-  call kinetics_slip(Mp,T,instance,of,dot_gamma_sl,ddot_gamma_dtau_slip)
+  call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,ddot_gamma_dtau_slip)
   slipContribution: do i = 1, prm%sum_N_sl
     Lp = Lp + dot_gamma_sl(i)*prm%P_sl(1:3,1:3,i)
     forall (k=1:3,l=1:3,m=1:3,n=1:3) &
@@ -636,12 +644,13 @@ end subroutine plastic_dislotwin_LpAndItsTangent
 !--------------------------------------------------------------------------------------------------
 !> @brief Calculate the rate of change of microstructure.
 !--------------------------------------------------------------------------------------------------
-module subroutine plastic_dislotwin_dotState(Mp,T,instance,of)
+module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
 
   real(pReal), dimension(3,3),  intent(in):: &
     Mp                                                                                              !< Mandel stress
   real(pReal),                  intent(in) :: &
-    T                                                                                               !< temperature at integration point
+    T, &                                                                                            !< temperature at integration point
+    subdt
   integer,                      intent(in) :: &
     instance, &
     of
@@ -659,7 +668,8 @@ module subroutine plastic_dislotwin_dotState(Mp,T,instance,of)
     dot_rho_dip_formation, &
     dot_rho_dip_climb, &
     rho_dip_distance_min, &
-    dot_gamma_sl
+    dot_gamma_sl, &
+    dot_h_slip
   real(pReal), dimension(param(instance)%sum_N_tw) :: &
     dot_gamma_twin
   real(pReal), dimension(param(instance)%sum_N_tr) :: &
@@ -672,8 +682,9 @@ module subroutine plastic_dislotwin_dotState(Mp,T,instance,of)
               - sum(stt%f_tw(1:prm%sum_N_tw,of)) &
               - sum(stt%f_tr(1:prm%sum_N_tr,of))
 
-  call kinetics_slip(Mp,T,instance,of,dot_gamma_sl)
+  call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,dot_h_slip)
   dot%gamma_sl(:,of) = abs(dot_gamma_sl)
+  dot%h_line(:,of) = dot_h_slip  
 
   rho_dip_distance_min = prm%D_a*prm%b_sl
 
@@ -884,19 +895,22 @@ end subroutine plastic_dislotwin_results
 ! NOTE: Against the common convention, the result (i.e. intent(out)) variables are the last to
 ! have the optional arguments at the end
 !--------------------------------------------------------------------------------------------------
-pure subroutine kinetics_slip(Mp,T,instance,of, &
-                              dot_gamma_sl,ddot_gamma_dtau_slip,tau_slip)
+subroutine kinetics_slip(Mp,T,subdt,instance,of, &
+                              dot_gamma_sl,ddot_gamma_dtau_slip,tau_slip,dot_h_slip)
 
   real(pReal), dimension(3,3),  intent(in) :: &
     Mp                                                                                              !< Mandel stress
   real(pReal),                  intent(in) :: &
-    T                                                                                               !< temperature
+    T, &                                                                                            !< temperature
+    subdt
   integer,                      intent(in) :: &
     instance, &
     of
 
   real(pReal), dimension(param(instance)%sum_N_sl), intent(out) :: &
     dot_gamma_sl
+  real(pReal), dimension(param(instance)%sum_N_sl), optional,intent(out) :: &
+    dot_h_slip
   real(pReal), dimension(param(instance)%sum_N_sl), optional, intent(out) :: &
     ddot_gamma_dtau_slip, &
     tau_slip
@@ -905,51 +919,43 @@ pure subroutine kinetics_slip(Mp,T,instance,of, &
 
   real(pReal), dimension(param(instance)%sum_N_sl) :: &
     tau, &
-    stressRatio, &
-    StressRatio_p, &
-    BoltzmannRatio, &
-    v_wait_inverse, &                                                                               !< inverse of the effective velocity of a dislocation waiting at obstacles (unsigned)
-    v_run_inverse, &                                                                                !< inverse of the velocity of a free moving dislocation (unsigned)
-    dV_wait_inverse_dTau, &
-    dV_run_inverse_dTau, &
-    dV_dTau, &
-    tau_eff                                                                                         !< effective resolved stress
+    tau_bar, &
+    Delta_t_bar, &
+    dot_h, &
+    h_new, &
+    alpha_coefficient
   integer :: i
 
   associate(prm => param(instance), stt => state(instance), dst => dependentState(instance))
 
+  dot_h = 0.0_pReal
+  alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl)
+  
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
   enddo
 
-  tau_eff = abs(tau)-dst%tau_pass(:,of)
+  tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
+  Delta_t_bar  = (prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
-  significantStress: where(tau_eff > tol_math_check)
-    stressRatio    = tau_eff/prm%tau_0
-    StressRatio_p  = stressRatio** prm%p
-    BoltzmannRatio = prm%Q_s/(kB*T)
-    v_wait_inverse = prm%v_0**(-1.0_pReal) * exp(BoltzmannRatio*(1.0_pReal-StressRatio_p)** prm%q)
-    v_run_inverse  = prm%B/(tau_eff*prm%b_sl)
+  do i = 1, prm%sum_N_sl
+    call  newton_rhaphson(stt%h_line(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) !dot_h needed to be added ??? 
+                                                                                                              ! dot_h always initiazed as 0
 
-    dot_gamma_sl = sign(stt%rho_mob(:,of)*prm%b_sl/(v_wait_inverse+v_run_inverse),tau)
+!! my guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
+   ! math_newton_rhaphson(stt%h_line(i,of),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) 
+    dot_h(i)   = h_new(i) - stt%h_line(i,of)                                                            ! vectorize later 
+    dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+                (Abar(stt%h_line(i,of)+dot_h(i))-Abar(stt%h_line(i,of)))/Delta_t_bar(i)
+  enddo
 
-    dV_wait_inverse_dTau = -1.0_pReal * v_wait_inverse * prm%p * prm%q * BoltzmannRatio &
-                         * (stressRatio**(prm%p-1.0_pReal)) &
-                         * (1.0_pReal-StressRatio_p)**(prm%q-1.0_pReal) &
-                         / prm%tau_0
-    dV_run_inverse_dTau  = -1.0_pReal * v_run_inverse/tau_eff
-    dV_dTau              = -1.0_pReal * (dV_wait_inverse_dTau+dV_run_inverse_dTau) &
-                         / (v_wait_inverse+v_run_inverse)**2.0_pReal
-    ddot_gamma_dtau = dV_dTau*stt%rho_mob(:,of)*prm%b_sl
-  else where significantStress
-    dot_gamma_sl    = 0.0_pReal
-    ddot_gamma_dtau = 0.0_pReal
-  end where significantStress
+  ddot_gamma_dtau = 0.0_pReal
 
   end associate
 
   if(present(ddot_gamma_dtau_slip)) ddot_gamma_dtau_slip = ddot_gamma_dtau
   if(present(tau_slip))             tau_slip             = tau
+  if(present(dot_h_slip))           dot_h_slip           = dot_h
 
 end subroutine kinetics_slip
 

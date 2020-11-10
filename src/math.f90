@@ -120,6 +120,31 @@ subroutine math_init
 end subroutine math_init
 
 
+function Abar(h) 
+
+  real(pReal), intent(in) :: h
+
+  real(pReal) ::  Abar
+
+  if (abs(h)>0) then
+     Abar=(1 + 4*(h**2))**2/(16.*(h**2))
+
+     if (abs(h)>0.0 .AND. abs(h)<0.5) then
+       Abar=Abar*(2*asin((4*h)/(1 + 4*(h**2))) - sin(2*asin((4*h)/(1 + 4*(h**2)))))
+     else if (h<=-0.5) then
+            Abar=Abar*(-2*(PI + asin((4*h)/(1 + 4*(h**2)))) + sin(2*asin((4*h)/(1 + 4*(h**2)))))
+     else if (h>=0.5) Then
+            Abar=Abar*(PI + 2*acos((4*h)/(1 + 4*(h**2))) + sin(2*acos((4*h)/(1 + 4*(h**2)))))
+     end if
+    else 
+            Abar=0.0
+    endif
+
+    Abar=Abar*(1/PI)        
+
+end function Abar
+
+
 function f_anelastic(tau_bar,Delta_t_bar,h_old,h_new) 
 
   real(pReal),    intent(in)  :: tau_bar
@@ -150,7 +175,7 @@ function f_prime(tau_bar,h_new)
 
 end function f_prime
 
-subroutine newton_rhapson(start,Delta_t,tau_bar,h_old,root)
+subroutine newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
 
   real(pReal),    intent(in)  :: start
   real(pReal),    intent(in)  :: Delta_t
@@ -190,7 +215,7 @@ subroutine newton_rhapson(start,Delta_t,tau_bar,h_old,root)
      print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
   end do
 
-end subroutine newton_rhapson
+end subroutine newton_rhaphson
 
 !--------------------------------------------------------------------------------------------------
 !> @brief Sorting of two-dimensional integer arrays
