@@ -103,11 +103,12 @@ module constitutive
         of
     end subroutine plastic_kinehardening_dotState
 
-    module subroutine plastic_dislotwin_dotState(Mp,T,instance,of)
+    module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
       real(pReal), dimension(3,3),  intent(in) :: &
         Mp                                                                                          !< Mandel stress
       real(pReal),                  intent(in) :: &
-        T
+        T, &
+        subdt
       integer,                      intent(in) :: &
         instance, &
         of
@@ -312,7 +313,7 @@ module constitutive
   interface constitutive_LpAndItsTangents
 
     module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
-                                         S, Fi, ipc, ip, el)
+                                         S, Fi, subdt, ipc, ip, el)
       integer, intent(in) :: &
         ipc, &                                                                                      !< component-ID of integration point
         ip, &                                                                                       !< integration point
@@ -320,12 +321,14 @@ module constitutive
       real(pReal),   intent(in),  dimension(3,3) :: &
         S, &                                                                                        !< 2nd Piola-Kirchhoff stress
         Fi                                                                                          !< intermediate deformation gradient
+      real(pReal),   intent(in) :: &
+        subdt
       real(pReal),   intent(out), dimension(3,3) :: &
         Lp                                                                                          !< plastic velocity gradient
       real(pReal),   intent(out), dimension(3,3,3,3) :: &
         dLp_dS, &
         dLp_dFi                                                                                     !< derivative of Lp with respect to Fi
-    end subroutine constitutive_plastic_LpAndItsTangents
+   end subroutine constitutive_plastic_LpAndItsTangents
 
   end interface constitutive_LpAndItsTangents
 
@@ -787,7 +790,7 @@ function constitutive_collectDotState(S, FArray, Fi, FpArray, subdt, ipc, ip, el
       call plastic_kinehardening_dotState(Mp,instance,of)
 
     case (PLASTICITY_DISLOTWIN_ID) plasticityType
-      call plastic_dislotwin_dotState(Mp,temperature(ho)%p(tme),instance,of)
+      call plastic_dislotwin_dotState(Mp,temperature(ho)%p(tme),subdt,instance,of)
 
     case (PLASTICITY_DISLOTUNGSTEN_ID) plasticityType
       call plastic_disloTungsten_dotState(Mp,temperature(ho)%p(tme),instance,of)

@@ -617,7 +617,8 @@ function crystallite_stressTangent(c,i,e) result(dPdF)
 
         call constitutive_LpAndItsTangents(devNull,dLpdS,dLpdFi, &
                                            crystallite_S (1:3,1:3,c,i,e), &
-                                           crystallite_Fi(1:3,1:3,c,i,e),c,i,e)                     ! call constitutive law to calculate Lp tangent in lattice configuration
+                                           crystallite_Fi(1:3,1:3,c,i,e),crystallite_subdt(c,i,e),&
+                                           c,i,e)  ! call constitutive law to calculate Lp tangent in lattice configuration
         dLpdS = math_mul3333xx3333(dLpdFi,dFidS) + dLpdS
 
 !--------------------------------------------------------------------------------------------------
@@ -973,7 +974,8 @@ function integrateStress(ipc,ip,el,timeFraction) result(broken)
                                         Fe, Fi_new, ipc, ip, el)
 
       call constitutive_LpAndItsTangents(Lp_constitutive, dLp_dS, dLp_dFi, &
-                                         S, Fi_new, ipc, ip, el)
+                                         S, Fi_new, crystallite_subdt(ipc,ip,el),& 
+                                         ipc, ip, el)
 
       !* update current residuum and check for convergence of loop
       atol_Lp = max(num%rtol_crystalliteStress * max(norm2(Lpguess),norm2(Lp_constitutive)), &      ! absolute tolerance from largest acceptable relative error

@@ -79,7 +79,7 @@ submodule(constitutive) constitutive_plastic
         of
     end subroutine plastic_kinehardening_LpAndItsTangent
 
-    module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,instance,of)
+    module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,subdt,instance,of)
       real(pReal), dimension(3,3),     intent(out) :: &
         Lp                                                                                          !< plastic velocity gradient
       real(pReal), dimension(3,3,3,3), intent(out) :: &
@@ -88,7 +88,8 @@ submodule(constitutive) constitutive_plastic
       real(pReal), dimension(3,3),     intent(in) :: &
         Mp                                                                                          !< Mandel stress
       real(pReal),                     intent(in) :: &
-        T
+        T, &
+        subdt
       integer,                         intent(in) :: &
         instance, &
         of
@@ -289,7 +290,7 @@ end subroutine constitutive_plastic_dependentState
 ! Mp in, dLp_dMp out
 !--------------------------------------------------------------------------------------------------
 module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
-                                     S, Fi, ipc, ip, el)
+                                     S, Fi, subdt, ipc, ip, el)
   integer, intent(in) :: &
     ipc, &                                                                                          !< component-ID of integration point
     ip, &                                                                                           !< integration point
@@ -297,6 +298,8 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
   real(pReal),   intent(in),  dimension(3,3) :: &
     S, &                                                                                            !< 2nd Piola-Kirchhoff stress
     Fi                                                                                              !< intermediate deformation gradient
+  real(pReal),   intent(in) :: &
+    subdt
   real(pReal),   intent(out), dimension(3,3) :: &
     Lp                                                                                              !< plastic velocity gradient
   real(pReal),   intent(out), dimension(3,3,3,3) :: &
@@ -339,7 +342,7 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
       call plastic_nonlocal_LpAndItsTangent(Lp,dLp_dMp,Mp, temperature(ho)%p(tme),instance,of,ip,el)
 
     case (PLASTICITY_DISLOTWIN_ID) plasticityType
-      call plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,temperature(ho)%p(tme),instance,of)
+      call plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,temperature(ho)%p(tme),subdt,instance,of)
 
     case (PLASTICITY_DISLOTUNGSTEN_ID) plasticityType
       call plastic_disloTungsten_LpAndItsTangent(Lp,dLp_dMp,Mp,temperature(ho)%p(tme),instance,of)
