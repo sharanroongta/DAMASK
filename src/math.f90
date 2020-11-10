@@ -120,6 +120,78 @@ subroutine math_init
 end subroutine math_init
 
 
+function f_anelastic(tau_bar,Delta_t_bar,h_old,h_new) 
+
+  real(pReal),    intent(in)  :: tau_bar
+  real(pReal),    intent(in)  :: Delta_t_bar
+  real(pReal),    intent(in)  :: h_old
+  real(pReal),    intent(in)  :: h_new
+
+  real(pReal)  :: f_anelastic
+
+  f_anelastic = sqrt((tau_bar**2) - 1) 
+  f_anelastic = (1/(f_anelastic*tau_bar))& 
+      &*(atan((2*h_new*tau_bar-1)/f_anelastic) - atan((2*h_old*tau_bar)/f_anelastic)& !mistake in these lines
+      &+ 0.5*f_anelastic*log(( tau_bar -4*h_new + 4*(h_new**2)*tau_bar)&  !mistake in these lines
+      &/(tau_bar -4*h_old + 4*(h_old**2)*tau_bar)))  !mistake in these lines 
+  f_anelastic = (tau_bar/abs(tau_bar))*(f_anelastic + h_new - h_old) - Delta_t_bar 
+
+end function f_anelastic
+
+
+function f_prime(tau_bar,h_new) 
+
+  real(pReal),    intent(in)  :: tau_bar
+  real(pReal),    intent(in)  :: h_new
+
+  real(pReal) :: f_prime
+
+  f_prime = abs(tau_bar*(1 + 4*(h_new**2)))/(tau_bar - 4*h_new + 4*tau_bar*(h_new**2))
+
+end function f_prime
+
+subroutine newton_rhapson(start,Delta_t,tau_bar,h_old,root)
+
+  real(pReal),    intent(in)  :: start
+  real(pReal),    intent(in)  :: Delta_t
+  real(pReal),    intent(in)  :: tau_bar
+  real(pReal),    intent(in)  :: h_old
+  real(pReal),    intent(out) :: root
+
+  real(pReal) :: delta, &
+                 error, &
+                 f_val, &
+                 f_der
+
+  integer     :: max_iter, &
+                 i
+
+  delta = 0.1
+  error = 0.00001
+  max_iter = 1000
+  ! Begin the iteration up to the maximum number specified
+  root = start
+
+  do i = 1, max_iter
+     f_val = f_anelastic(tau_bar,Delta_t,h_old,root)
+      print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
+     if(abs(f_val ) <= error) then
+       ! A root has been found
+       return
+     end if
+     f_der = f_prime(tau_bar,root)
+        print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
+     if(f_der == 0.0_pReal) then
+       ! f'(x)=0 so no more iterations are possible
+       return
+     end if
+     
+     root = root - delta*(f_val/f_der)                         ! EQ. 21
+     print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
+  end do
+
+end subroutine newton_rhapson
+
 !--------------------------------------------------------------------------------------------------
 !> @brief Sorting of two-dimensional integer arrays
 !> @details Based on quicksort.
