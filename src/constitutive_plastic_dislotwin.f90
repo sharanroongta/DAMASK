@@ -946,7 +946,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
    ! math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
     dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
     dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
-                (Abar(stt%h(i,of)+dot_h(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
+                (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
   enddo
 
   ddot_gamma_dtau = 0.0_pReal
