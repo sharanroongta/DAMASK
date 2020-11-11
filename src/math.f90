@@ -145,21 +145,24 @@ function Abar(h)
 end function Abar
 
 
-function f_anelastic(tau_bar,Delta_t_bar,h_old,h_new) 
+Real function f_anelastic(taubar,deltatbar,hold,hnew)             ! EQ. 17 to crystallite.f90  
 
-  real(pReal),    intent(in)  :: tau_bar
-  real(pReal),    intent(in)  :: Delta_t_bar
-  real(pReal),    intent(in)  :: h_old
-  real(pReal),    intent(in)  :: h_new
+   IMPLICIT NONE
+   complex       :: sqrt_term
+   complex       :: fimag
+   real, intent(in)     :: taubar
+   real, intent(in)     :: deltatbar
+   real, intent(in)     :: hold
+   real, intent(in)     :: hnew
 
-  real(pReal)  :: f_anelastic
-
-  f_anelastic = sqrt((tau_bar**2) - 1) 
-  f_anelastic = (1/(f_anelastic*tau_bar))& 
-      &*(atan((2*h_new*tau_bar-1)/f_anelastic) - atan((2*h_old*tau_bar)/f_anelastic)& !mistake in these lines
-      &+ 0.5*f_anelastic*log(( tau_bar -4*h_new + 4*(h_new**2)*tau_bar)&  !mistake in these lines
-      &/(tau_bar -4*h_old + 4*(h_old**2)*tau_bar)))  !mistake in these lines 
-  f_anelastic = (tau_bar/abs(tau_bar))*(f_anelastic + h_new - h_old) - Delta_t_bar 
+   sqrt_term = Sqrt(Cmplx(-1 + taubar**2))
+   fimag =  -deltatbar + (taubar*(hnew - hold - &
+            ATan((-1 + 2*hold*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            ATAN((-1 + 2*hnew*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            Log(Cmplx((-4*hnew + taubar + 4*hnew**2*taubar)/ &
+              (-4*hold + taubar + 4*hold**2*taubar)))  &
+               /(2.*taubar)))/Abs(taubar)
+   f_anelastic=dble(fimag)
 
 end function f_anelastic
 
