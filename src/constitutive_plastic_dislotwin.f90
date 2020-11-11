@@ -938,16 +938,19 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   dot_h = 0.0_pReal
   alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
   write(6,*) 'alpha_coeff',alpha_coefficient
+  write(6,*) 'subdt --- ',subdt
   
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
   enddo
 
+  write(6,*) 'tau',tau
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
+  write(6,*) 'tau_bar',tau_bar
   Delta_t_bar  = abs((prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B)        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
   do i = 1, prm%sum_N_sl
-    if (tau(i) == 0.0 .OR. Delta_t_bar(i) == 0.0) then
+    if (abs(tau_bar(i)) < 1E-05 .AND. Delta_t_bar(i) < 1E-05) then
       dot_gamma_sl(i) = 0.0
       dot_h(i) = 0.0
     else 

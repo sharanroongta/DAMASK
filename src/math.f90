@@ -194,29 +194,36 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   integer     :: max_iter, &
                  i
 
-  delta = 0.1
+  delta = 0.001
   error = 0.00001
-  max_iter = 1000
+  max_iter = 100000
   ! Begin the iteration up to the maximum number specified
   root = start
 
+  write(6,*) 'start',start
+  write(6,*) 'Delta_t',Delta_t
+  write(6,*) 'tau_bar',tau_bar
+  write(6,*) 'h_old',h_old
+  write(6,*) 'root',root
+  flush(6)
   do i = 1, max_iter
      f_val = f_anelastic(tau_bar,Delta_t,h_old,root)
-      print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
+    !  print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
      if(abs(f_val ) <= error) then
        ! A root has been found
        return
      end if
      f_der = f_prime(tau_bar,root)
-        print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
+   !     print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
      if(f_der == 0.0_pReal) then
        ! f'(x)=0 so no more iterations are possible
        return
      end if
      
      root = root - delta*(f_val/f_der)                         ! EQ. 21
-     print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
+  !   print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
   end do
+  print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
 
 end subroutine math_newton_rhaphson
 
