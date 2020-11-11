@@ -734,6 +734,9 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
                     - 2.0_pReal*rho_dip_distance_min/prm%b_sl * stt%rho_dip(:,of)*abs(dot_gamma_sl) &
                     - dot_rho_dip_climb
 
+  dot%rho_mob(:,of) = 0.0
+  dot%rho_dip(:,of) = 0.0
+
   call kinetics_twin(Mp,T,dot_gamma_sl,instance,of,dot_gamma_twin)
   dot%f_tw(:,of) = f_unrotated*dot_gamma_twin/prm%gamma_char
 
