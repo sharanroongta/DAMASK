@@ -12,11 +12,15 @@ submodule(constitutive:constitutive_plastic) plastic_isotropic
   type :: tParameters
     real(pReal) :: &
       M, &                                                                                          !< Taylor factor
+      M_2d, &
       dot_gamma_0, &                                                                                !< reference strain rate
       n, &                                                                                          !< stress exponent
       h_0, &
+      h_0_2d, &
       h_ln, &
       xi_inf, &                                                                                     !< maximum critical stress
+      xi_inf_2d, &
+      phi,&
       a, &
       c_1, &
       c_4, &
@@ -33,7 +37,9 @@ submodule(constitutive:constitutive_plastic) plastic_isotropic
   type :: tIsotropicState
     real(pReal), pointer, dimension(:) :: &
       xi, &
-      gamma
+      xi_2d, &
+      gamma, &
+      gamma_2d
   end type tIsotropicState
 
 !--------------------------------------------------------------------------------------------------
@@ -59,7 +65,8 @@ module function plastic_isotropic_init() result(myPlasticity)
     Nconstituents, &
     sizeState, sizeDotState
   real(pReal) :: &
-    xi_0                                                                                            !< initial critical stress
+    xi_0, &                                                                                         !< initial critical stress
+    xi_0_2d
   character(len=pStringLen) :: &
     extmsg = ''
   class(tNode), pointer :: &
@@ -106,11 +113,16 @@ module function plastic_isotropic_init() result(myPlasticity)
 #endif
 
     xi_0            = pl%get_asFloat('xi_0')
+    xi_0_2d         = pl%get_asFloat('xi_0_2d')
     prm%xi_inf      = pl%get_asFloat('xi_inf')
+    prm%xi_inf_2d   = pl%get_asFloat('xi_inf_2d')
     prm%dot_gamma_0 = pl%get_asFloat('dot_gamma_0')
     prm%n           = pl%get_asFloat('n')
     prm%h_0         = pl%get_asFloat('h_0')
+    prm%h_0_2d      = pl%get_asFloat('h_0_2d')
     prm%M           = pl%get_asFloat('M')
+    prm%M_2d        = pl%get_asFloat('M_2d')
+    prm%phi         = pl%get_asFloat('phi')
     prm%h_ln        = pl%get_asFloat('h_ln', defaultVal=0.0_pReal)
     prm%c_1         = pl%get_asFloat('c_1',  defaultVal=0.0_pReal)
     prm%c_4         = pl%get_asFloat('c_4',  defaultVal=0.0_pReal)
@@ -131,7 +143,7 @@ module function plastic_isotropic_init() result(myPlasticity)
 !--------------------------------------------------------------------------------------------------
 ! allocate state arrays
     Nconstituents = count(material_phaseAt == p) * discretization_nIPs
-    sizeDotState = size(['xi   ','gamma'])
+    sizeDotState = size(['xi     ','gamma   ','xi_2d   ','gamma_2d'])
     sizeState = sizeDotState
 
     call constitutive_allocateState(plasticState(p),Nconstituents,sizeState,sizeDotState,0)
@@ -144,12 +156,24 @@ module function plastic_isotropic_init() result(myPlasticity)
     plasticState(p)%atol(1) = pl%get_asFloat('atol_xi',defaultVal=1.0_pReal)
     if (plasticState(p)%atol(1) < 0.0_pReal) extmsg = trim(extmsg)//' atol_xi'
 
-    stt%gamma  => plasticState(p)%state   (2,:)
+    stt%xi_2d  => plasticState(p)%state   (2,:)
+    stt%xi_2d  =  xi_0_2d
+    dot%xi_2d  => plasticState(p)%dotState(2,:)
+    plasticState(p)%atol(3) = pl%get_asFloat('atol_xi_2d',defaultVal=1.0_pReal)
+    if (plasticState(p)%atol(3) < 0.0_pReal) extmsg = trim(extmsg)//' atol_xi_2d'
+
+    stt%gamma  => plasticState(p)%state   (3,:)
     dot%gamma  => plasticState(p)%dotState(2,:)
     plasticState(p)%atol(2) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
     if (plasticState(p)%atol(2) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma'
+
+    stt%gamma_2d  => plasticState(p)%state   (4,:)
+    dot%gamma_2d  => plasticState(p)%dotState(4,:)
+    plasticState(p)%atol(4) = pl%get_asFloat('atol_gamma_2d',defaultVal=1.0e-6_pReal)
+    if (plasticState(p)%atol(4) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma_2d'
+
     ! global alias
-    plasticState(p)%slipRate        => plasticState(p)%dotState(2:2,:)
+    plasticState(p)%slipRate        => plasticState(p)%dotState(3:4,:)
 
     plasticState(p)%state0 = plasticState(p)%state                                                  ! ToDo: this could be done centrally
 
@@ -181,11 +205,17 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
     of
 
   real(pReal), dimension(3,3) :: &
-    Mp_dev                                                                                          !< deviatoric part of the Mandel stress
+    Mp_dev, &                                                                                       !< deviatoric part of the Mandel stress
+    proj_nrml                                                                  !normal projection of tensor on the plane
   real(pReal) :: &
     dot_gamma, &                                                                                    !< strainrate
+    dot_gamma_2d, &
     norm_Mp_dev, &                                                                                  !< norm of the deviatoric part of the Mandel stress
-    squarenorm_Mp_dev                                                                               !< square of the norm of the deviatoric part of the Mandel stress
+    squarenorm_Mp_dev, &                                                                            !< square of the norm of the deviatoric part of the Mandel stress
+    Mp_nn_2d, &
+    Mp_ns_2d
+  real(pReal), dimension(3,1) :: &
+    hs                                                                         !direction vector of shear stress on the interface plane
   integer :: &
     k, l, m, n
 
