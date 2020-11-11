@@ -91,7 +91,7 @@ submodule(constitutive:constitutive_plastic) plastic_dislotwin
       gamma_sl, &
       f_tw, &
       f_tr, &
-      h_line
+      h
   end type tDislotwinState
 
   type :: tDislotwinMicrostructure
@@ -136,7 +136,8 @@ module function plastic_dislotwin_init() result(myPlasticity)
     N_sl, N_tw, N_tr
   real(pReal), allocatable, dimension(:) :: &
     rho_mob_0, &                                                                                    !< initial unipolar dislocation density per slip system
-    rho_dip_0                                                                                       !< initial dipole dislocation density per slip system
+    rho_dip_0, &
+    h_0                                                                                       !< initial dipole dislocation density per slip system
   character(len=pStringLen) :: &
     extmsg = ''
   class(tNode), pointer :: &
@@ -210,6 +211,7 @@ module function plastic_dislotwin_init() result(myPlasticity)
 
       rho_mob_0                = pl%get_asFloats('rho_mob_0',   requiredSize=size(N_sl))
       rho_dip_0                = pl%get_asFloats('rho_dip_0',   requiredSize=size(N_sl))
+      h_0                      = pl%get_asFloats('h_0',         requiredSize=size(N_sl))
       prm%v_0                  = pl%get_asFloats('v_0',         requiredSize=size(N_sl))
       prm%b_sl                 = pl%get_asFloats('b_sl',        requiredSize=size(N_sl))
       prm%Q_s                  = pl%get_asFloats('Q_s',         requiredSize=size(N_sl))
@@ -239,6 +241,7 @@ module function plastic_dislotwin_init() result(myPlasticity)
       ! expand: family => system
       rho_mob_0        = math_expand(rho_mob_0,       N_sl)
       rho_dip_0        = math_expand(rho_dip_0,       N_sl)
+      h_0              = math_expand(h_0,             N_sl)
       prm%v_0          = math_expand(prm%v_0,         N_sl)
       prm%b_sl         = math_expand(prm%b_sl,        N_sl)
       prm%Q_s          = math_expand(prm%Q_s,         N_sl)
@@ -409,7 +412,7 @@ module function plastic_dislotwin_init() result(myPlasticity)
 !--------------------------------------------------------------------------------------------------
 ! allocate state arrays
     Nconstituents  = count(material_phaseAt == p) * discretization_nIPs
-    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl', 'h_line  ']) * prm%sum_N_sl &
+    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl', 'h       ']) * prm%sum_N_sl &
                  + size(['f_tw'])                           * prm%sum_N_tw &
                  + size(['f_tr'])                           * prm%sum_N_tr
     sizeState = sizeDotState
@@ -436,16 +439,17 @@ module function plastic_dislotwin_init() result(myPlasticity)
 
     startIndex = endIndex + 1
     endIndex   = endIndex + prm%sum_N_sl
+    stt%h=>plasticState(p)%state(startIndex:endIndex,:)
+    stt%h= spread(h_0,2,Nconstituents)
+    dot%h=>plasticState(p)%dotState(startIndex:endIndex,:)
+    plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
+
+    startIndex = endIndex + 1
+    endIndex   = endIndex + prm%sum_N_sl
     stt%gamma_sl=>plasticState(p)%state(startIndex:endIndex,:)
     dot%gamma_sl=>plasticState(p)%dotState(startIndex:endIndex,:)
     plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal
 
-    startIndex = endIndex + 1
-    endIndex   = endIndex + prm%sum_N_sl
-    stt%h_line=>plasticState(p)%state(startIndex:endIndex,:)
-    dot%h_line=>plasticState(p)%dotState(startIndex:endIndex,:)
-    plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
- 
     ! global alias
     plasticState(p)%slipRate        => plasticState(p)%dotState(startIndex:endIndex,:)
 
@@ -684,7 +688,7 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
 
   call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,dot_h_slip)
   dot%gamma_sl(:,of) = abs(dot_gamma_sl)
-  dot%h_line(:,of) = dot_h_slip  
+  dot%h(:,of) = dot_h_slip  
 
   rho_dip_distance_min = prm%D_a*prm%b_sl
 
@@ -733,6 +737,9 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
   dot%rho_dip(:,of) = dot_rho_dip_formation &
                     - 2.0_pReal*rho_dip_distance_min/prm%b_sl * stt%rho_dip(:,of)*abs(dot_gamma_sl) &
                     - dot_rho_dip_climb
+
+  dot%rho_mob(:,of) = 0.0
+  dot%rho_dip(:,of) = 0.0
 
   call kinetics_twin(Mp,T,dot_gamma_sl,instance,of,dot_gamma_twin)
   dot%f_tw(:,of) = f_unrotated*dot_gamma_twin/prm%gamma_char
@@ -929,24 +936,33 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   associate(prm => param(instance), stt => state(instance), dst => dependentState(instance))
 
   dot_h = 0.0_pReal
-  alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl)
+  alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
+  write(6,*) 'alpha_coeff',alpha_coefficient
+  write(6,*) 'subdt --- ',subdt
   
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
   enddo
 
+  write(6,*) 'tau',tau
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
-  Delta_t_bar  = (prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
+  write(6,*) 'tau_bar',tau_bar
+  Delta_t_bar  = abs((prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B)        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
   do i = 1, prm%sum_N_sl
-    call  newton_rhaphson(stt%h_line(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) !dot_h needed to be added ??? 
-                                                                                                              ! dot_h always initiazed as 0
+    if (abs(tau_bar(i)) < 1E-05 .AND. Delta_t_bar(i) < 1E-05) then
+      dot_gamma_sl(i) = 0.0
+      dot_h(i) = 0.0
+    else 
+      call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
+                                                                                                                ! dot_h always initiazed as 0
 
-!! my guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
-   ! math_newton_rhaphson(stt%h_line(i,of),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) 
-    dot_h(i)   = h_new(i) - stt%h_line(i,of)                                                            ! vectorize later 
-    dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
-                (Abar(stt%h_line(i,of)+dot_h(i))-Abar(stt%h_line(i,of)))/Delta_t_bar(i)
+!! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
+   !   math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
+      dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
+      dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+                  (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
+    endif
   enddo
 
   ddot_gamma_dtau = 0.0_pReal

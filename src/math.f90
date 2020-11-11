@@ -145,21 +145,24 @@ function Abar(h)
 end function Abar
 
 
-function f_anelastic(tau_bar,Delta_t_bar,h_old,h_new) 
+Real function f_anelastic(taubar,deltatbar,hold,hnew)             ! EQ. 17 to crystallite.f90  
 
-  real(pReal),    intent(in)  :: tau_bar
-  real(pReal),    intent(in)  :: Delta_t_bar
-  real(pReal),    intent(in)  :: h_old
-  real(pReal),    intent(in)  :: h_new
+   IMPLICIT NONE
+   complex       :: sqrt_term
+   complex       :: fimag
+   real, intent(in)     :: taubar
+   real, intent(in)     :: deltatbar
+   real, intent(in)     :: hold
+   real, intent(in)     :: hnew
 
-  real(pReal)  :: f_anelastic
-
-  f_anelastic = sqrt((tau_bar**2) - 1) 
-  f_anelastic = (1/(f_anelastic*tau_bar))& 
-      &*(atan((2*h_new*tau_bar-1)/f_anelastic) - atan((2*h_old*tau_bar)/f_anelastic)& !mistake in these lines
-      &+ 0.5*f_anelastic*log(( tau_bar -4*h_new + 4*(h_new**2)*tau_bar)&  !mistake in these lines
-      &/(tau_bar -4*h_old + 4*(h_old**2)*tau_bar)))  !mistake in these lines 
-  f_anelastic = (tau_bar/abs(tau_bar))*(f_anelastic + h_new - h_old) - Delta_t_bar 
+   sqrt_term = Sqrt(Cmplx(-1 + taubar**2))
+   fimag =  -deltatbar + (taubar*(hnew - hold - &
+            ATan((-1 + 2*hold*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            ATAN((-1 + 2*hnew*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            Log(Cmplx((-4*hnew + taubar + 4*hnew**2*taubar)/ &
+              (-4*hold + taubar + 4*hold**2*taubar)))  &
+               /(2.*taubar)))/Abs(taubar)
+   f_anelastic=dble(fimag)
 
 end function f_anelastic
 
@@ -175,7 +178,7 @@ function f_prime(tau_bar,h_new)
 
 end function f_prime
 
-subroutine newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
+subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
 
   real(pReal),    intent(in)  :: start
   real(pReal),    intent(in)  :: Delta_t
@@ -191,31 +194,38 @@ subroutine newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   integer     :: max_iter, &
                  i
 
-  delta = 0.1
+  delta = 0.001
   error = 0.00001
-  max_iter = 1000
+  max_iter = 100000
   ! Begin the iteration up to the maximum number specified
   root = start
 
+  write(6,*) 'start',start
+  write(6,*) 'Delta_t',Delta_t
+  write(6,*) 'tau_bar',tau_bar
+  write(6,*) 'h_old',h_old
+  write(6,*) 'root',root
+  flush(6)
   do i = 1, max_iter
      f_val = f_anelastic(tau_bar,Delta_t,h_old,root)
-      print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
+    !  print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
      if(abs(f_val ) <= error) then
        ! A root has been found
        return
      end if
      f_der = f_prime(tau_bar,root)
-        print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
+   !     print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
      if(f_der == 0.0_pReal) then
        ! f'(x)=0 so no more iterations are possible
        return
      end if
      
      root = root - delta*(f_val/f_der)                         ! EQ. 21
-     print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
+  !   print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
   end do
+  print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
 
-end subroutine newton_rhaphson
+end subroutine math_newton_rhaphson
 
 !--------------------------------------------------------------------------------------------------
 !> @brief Sorting of two-dimensional integer arrays
