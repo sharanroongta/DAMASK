@@ -178,7 +178,7 @@ function f_prime(tau_bar,h_new)
 
 end function f_prime
 
-subroutine newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
+subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
 
   real(pReal),    intent(in)  :: start
   real(pReal),    intent(in)  :: Delta_t
@@ -218,7 +218,7 @@ subroutine newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
      print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
   end do
 
-end subroutine newton_rhaphson
+end subroutine math_newton_rhaphson
 
 !--------------------------------------------------------------------------------------------------
 !> @brief Sorting of two-dimensional integer arrays
