@@ -91,7 +91,7 @@ submodule(constitutive:constitutive_plastic) plastic_dislotwin
       gamma_sl, &
       f_tw, &
       f_tr, &
-      h_line
+      h
   end type tDislotwinState
 
   type :: tDislotwinMicrostructure
@@ -409,7 +409,7 @@ module function plastic_dislotwin_init() result(myPlasticity)
 !--------------------------------------------------------------------------------------------------
 ! allocate state arrays
     Nconstituents  = count(material_phaseAt == p) * discretization_nIPs
-    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl', 'h_line  ']) * prm%sum_N_sl &
+    sizeDotState = size(['rho_mob ','rho_dip ','gamma_sl', 'h       ']) * prm%sum_N_sl &
                  + size(['f_tw'])                           * prm%sum_N_tw &
                  + size(['f_tr'])                           * prm%sum_N_tr
     sizeState = sizeDotState
@@ -436,8 +436,8 @@ module function plastic_dislotwin_init() result(myPlasticity)
 
     startIndex = endIndex + 1
     endIndex   = endIndex + prm%sum_N_sl
-    stt%h_line=>plasticState(p)%state(startIndex:endIndex,:)
-    dot%h_line=>plasticState(p)%dotState(startIndex:endIndex,:)
+    stt%h=>plasticState(p)%state(startIndex:endIndex,:)
+    dot%h=>plasticState(p)%dotState(startIndex:endIndex,:)
     plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
 
     startIndex = endIndex + 1
@@ -684,7 +684,7 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
 
   call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,dot_h_slip)
   dot%gamma_sl(:,of) = abs(dot_gamma_sl)
-  dot%h_line(:,of) = dot_h_slip  
+  dot%h(:,of) = dot_h_slip  
 
   rho_dip_distance_min = prm%D_a*prm%b_sl
 
@@ -939,14 +939,14 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   Delta_t_bar  = (prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
   do i = 1, prm%sum_N_sl
-    call  math_newton_rhaphson(stt%h_line(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) !dot_h needed to be added ??? 
+    call  math_newton_rhaphson(stt%h(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) !dot_h needed to be added ??? 
                                                                                                               ! dot_h always initiazed as 0
 
 !! my guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
-   ! math_newton_rhaphson(stt%h_line(i,of),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) 
-    dot_h(i)   = h_new(i) - stt%h_line(i,of)                                                            ! vectorize later 
+   ! math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
+    dot_h(i)   = h_new(i) - stt%h(i,of)                                                            ! vectorize later 
     dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
-                (Abar(stt%h_line(i,of)+dot_h(i))-Abar(stt%h_line(i,of)))/Delta_t_bar(i)
+                (Abar(stt%h(i,of)+dot_h(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
   enddo
 
   ddot_gamma_dtau = 0.0_pReal
