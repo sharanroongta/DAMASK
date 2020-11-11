@@ -939,12 +939,12 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   Delta_t_bar  = (prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
   do i = 1, prm%sum_N_sl
-    call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) !dot_h needed to be added ??? 
+    call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
                                                                                                               ! dot_h always initiazed as 0
 
 !! my guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
    ! math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
-    dot_h(i)   = h_new(i) - stt%h(i,of)                                                            ! vectorize later 
+    dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
     dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
                 (Abar(stt%h(i,of)+dot_h(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
   enddo
