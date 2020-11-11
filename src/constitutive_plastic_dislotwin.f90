@@ -929,7 +929,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   associate(prm => param(instance), stt => state(instance), dst => dependentState(instance))
 
   dot_h = 0.0_pReal
-  alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl)
+  alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
   
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
