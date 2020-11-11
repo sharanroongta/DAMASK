@@ -436,16 +436,16 @@ module function plastic_dislotwin_init() result(myPlasticity)
 
     startIndex = endIndex + 1
     endIndex   = endIndex + prm%sum_N_sl
+    stt%h_line=>plasticState(p)%state(startIndex:endIndex,:)
+    dot%h_line=>plasticState(p)%dotState(startIndex:endIndex,:)
+    plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
+
+    startIndex = endIndex + 1
+    endIndex   = endIndex + prm%sum_N_sl
     stt%gamma_sl=>plasticState(p)%state(startIndex:endIndex,:)
     dot%gamma_sl=>plasticState(p)%dotState(startIndex:endIndex,:)
     plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal
 
-    startIndex = endIndex + 1
-    endIndex   = endIndex + prm%sum_N_sl
-    stt%h_line=>plasticState(p)%state(startIndex:endIndex,:)
-    dot%h_line=>plasticState(p)%dotState(startIndex:endIndex,:)
-    plasticState(p)%atol(startIndex:endIndex) = 1.0e-2_pReal           !check with Jan for a tolerance value
- 
     ! global alias
     plasticState(p)%slipRate        => plasticState(p)%dotState(startIndex:endIndex,:)
 
@@ -939,7 +939,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   Delta_t_bar  = (prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
 
   do i = 1, prm%sum_N_sl
-    call  newton_rhaphson(stt%h_line(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) !dot_h needed to be added ??? 
+    call  math_newton_rhaphson(stt%h_line(i,of)+dot_h(i),Delta_t_bar(i),tau_bar(i),stt%h_line(i,of),h_new(i)) !dot_h needed to be added ??? 
                                                                                                               ! dot_h always initiazed as 0
 
 !! my guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
