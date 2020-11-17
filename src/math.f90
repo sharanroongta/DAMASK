@@ -196,15 +196,15 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
 
   delta = 0.001
   error = 0.00001
-  max_iter = 100000
+  max_iter = 1 !100000
   ! Begin the iteration up to the maximum number specified
   root = start
 
-  write(6,*) 'start',start
-  write(6,*) 'Delta_t',Delta_t
-  write(6,*) 'tau_bar',tau_bar
-  write(6,*) 'h_old',h_old
-  write(6,*) 'root',root
+  !write(6,*) 'start',start
+  !write(6,*) 'Delta_t_NR',Delta_t
+  !write(6,*) 'tau_bar_NR',tau_bar
+  !write(6,*) 'h_old',h_old
+  !write(6,*) 'root',root
   flush(6)
   do i = 1, max_iter
      f_val = f_anelastic(tau_bar,Delta_t,h_old,root)

@@ -587,6 +587,8 @@ module subroutine plastic_dislotwin_LpAndItsTangent(Lp,dLp_dMp,Mp,T,subdt,instan
   Lp = 0.0_pReal
   dLp_dMp = 0.0_pReal
 
+  write(6,*) 'LpandTangent'
+  flush(6)
   call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,ddot_gamma_dtau_slip)
   slipContribution: do i = 1, prm%sum_N_sl
     Lp = Lp + dot_gamma_sl(i)*prm%P_sl(1:3,1:3,i)
@@ -686,6 +688,10 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
               - sum(stt%f_tw(1:prm%sum_N_tw,of)) &
               - sum(stt%f_tr(1:prm%sum_N_tr,of))
 
+  if (of == 1) then
+    write(6,*) 'material point',of
+    write(6,*) 'Mandel stress',Mp
+  endif
   call kinetics_slip(Mp,T,subdt,instance,of,dot_gamma_sl,dot_h_slip)
   dot%gamma_sl(:,of) = abs(dot_gamma_sl)
   dot%h(:,of) = dot_h_slip  
@@ -738,8 +744,8 @@ module subroutine plastic_dislotwin_dotState(Mp,T,subdt,instance,of)
                     - 2.0_pReal*rho_dip_distance_min/prm%b_sl * stt%rho_dip(:,of)*abs(dot_gamma_sl) &
                     - dot_rho_dip_climb
 
-  dot%rho_mob(:,of) = 0.0
-  dot%rho_dip(:,of) = 0.0
+  dot%rho_mob(:,of) = 0.0_pReal
+  dot%rho_dip(:,of) = 0.0_pReal
 
   call kinetics_twin(Mp,T,dot_gamma_sl,instance,of,dot_gamma_twin)
   dot%f_tw(:,of) = f_unrotated*dot_gamma_twin/prm%gamma_char
@@ -937,17 +943,22 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
 
   dot_h = 0.0_pReal
   alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
-  write(6,*) 'alpha_coeff',alpha_coefficient
-  write(6,*) 'subdt --- ',subdt
+  !write(6,*) 'material point ID',of
+  !write(6,*) 'alpha_coeff',alpha_coefficient
+  !write(6,*) 'subdt --- ',subdt
   
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
   enddo
 
-  write(6,*) 'tau',tau
+  if (of == 1) then
+    write(6,*) 'tau',tau
+    flush(6)
+  endif
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
-  write(6,*) 'tau_bar',tau_bar
+  !write(6,*) 'tau_bar',tau_bar
   Delta_t_bar  = abs((prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B)        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
+  !write(6,*) 'Delta_T_bar',Delta_t_bar
 
   do i = 1, prm%sum_N_sl
     if (abs(tau_bar(i)) < 1E-05 .AND. Delta_t_bar(i) < 1E-05) then
@@ -955,13 +966,17 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
       dot_h(i) = 0.0
     else 
       call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
+      !write(6,*) 'no newton rhapson called'
+      !flush(6)
                                                                                                                 ! dot_h always initiazed as 0
 
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
    !   math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
-      dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
-      dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
-                  (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
+      dot_h(i) = 0.0_pReal
+      dot_gamma_sl(i) = 0.0_pReal
+      !dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
+      !dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+      !            (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
     endif
   enddo
 
