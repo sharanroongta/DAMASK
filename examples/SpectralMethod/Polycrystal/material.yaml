@@ -113,14 +113,54 @@ phase:
       output: [F, P, F_e, F_p, L_p, O]
     lattice: fcc
     plasticity:
+      B: [0.1]
+      D: 2.0e-05
+      D_0: 4.0e-05
+      D_a: 1.0
+      Gamma_sf_0K: -0.0396
+      L_tr: 442.0
+      L_tw: 442.0
       N_sl: [12]
-      a_sl: 2.25
-      atol_xi: 1.0
-      dot_gamma_0_sl: 0.001
-      h_0_sl_sl: 75e6
-      h_sl_sl: [1, 1, 1.4, 1.4, 1.4, 1.4]
-      n_sl: 20
-      output: [xi_sl]
-      type: phenopowerlaw
-      xi_0_sl: [31e6]
-      xi_inf_sl: [63e6]
+      N_tr: [0]
+      N_tw: [0]
+      Q_cl: 4.5e-19
+      Q_s: [3.7e-19]
+      Q_sb: 3.7e-19
+      V_cs: 1.67e-29
+      a_bcc: 2.8665
+      a_fcc: 3.68
+      b_sl: [2.56e-10]
+      b_tr: [2.56e-10]
+      b_tw: [1.47e-10]
+      cThresholdTwin: 1.0
+      dGamma_sf_dT: 0.0002
+      delta_G: -150.0e6
+      f_at: 1.0
+      h_sl_sl: [0.122, 0.122, 0.625, 0.07, 0.137, 0.122]
+      h_sl_tr: [0.0, 0.0, 0.0]
+      h_sl_tw: [0.0, 1.0, 1.0]
+      h_tr_sl: [0.0]
+      h_tr_tr: [0.0, 0.0]
+      h_tw_sl: [0.0]
+      h_tw_tw: [0.0, 1.0]
+      i_sl: [10.0]
+      i_tw: 1.0
+      maxTwinFraction: 1.0
+      output: [rho_mob, rho_dip, gamma_sl, Lambda_sl, tau_pass, f_tw, Lambda_tw, tau_hat_tw, f_tr]
+      p_sb: 1.0
+      p_sl: [0.32]
+      p_tw: [10.0]
+      q_sb: 1.0
+      q_sl: [1.46]
+      rho_dip_0: [1.0e12]
+      rho_mob_0: [1.0e12]
+      h_0: [0.0] 
+      t_tr: [1.0e-07]
+      t_tw: [5.0e-08]
+      tau_0: 1.5e8
+      trans_lattice_structure: bcc
+      type: dislotwin
+      v_0: [10000.0]
+      v_sb: 0.0000000
+      x_c_tw: 1.0e-09
+      xi_sb: 180.0e6
