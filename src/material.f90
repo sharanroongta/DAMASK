@@ -85,6 +85,12 @@ module material
   integer, dimension(:,:,:), allocatable, public, protected :: &                                    ! (constituent,IP,elem)
     material_phaseMemberAt                                                                          !< position of the element within its phase instance
 
+  type :: habit_plane
+    real(pReal), dimension(3),public :: h_n
+  end type
+  type(habit_plane), dimension(:,:,:), allocatable, public :: &
+    material_habitPlane
+  
   type(tState),        allocatable, dimension(:), public :: &
     homogState, &
     thermalState, &
@@ -328,6 +334,7 @@ subroutine material_parseMaterial
   allocate(material_phaseMemberAt(homogenization_maxNconstituents,discretization_nIPs,discretization_Nelems),source=0)
 
   allocate(material_orientation0(homogenization_maxNconstituents,discretization_nIPs,discretization_Nelems))
+  allocate(material_habitPlane(homogenization_maxNconstituents,discretization_nIPs,discretization_Nelems)) 
 
   do e = 1, discretization_Nelems
     material     => materials%get(discretization_materialAt(e))
@@ -350,6 +357,8 @@ subroutine material_parseMaterial
         material_phaseMemberAt(c,i,e)       = counterPhase(material_phaseAt(c,e))
 
         call material_orientation0(c,i,e)%fromQuaternion(constituent%get_asFloats('O',requiredSize=4)) ! should be done in crystallite
+
+        material_habitPlane(c,i,e)%h_n = constituent%get_asFloats('h_n',requiredSize=3, defaultVal=emptyRealArray)
       enddo
 
     enddo

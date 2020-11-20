@@ -41,7 +41,7 @@ submodule(constitutive) constitutive_plastic
     end function plastic_nonlocal_init
 
 
-    module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
+    module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,of)
       real(pReal), dimension(3,3),     intent(out) :: &
         Lp                                                                                          !< plastic velocity gradient
       real(pReal), dimension(3,3,3,3), intent(out) :: &
@@ -49,6 +49,8 @@ submodule(constitutive) constitutive_plastic
 
       real(pReal), dimension(3,3),     intent(in) :: &
         Mp                                                                                          !< Mandel stress
+      real(pReal), dimension(3),       intent(in) :: &
+        h_n
       integer,                         intent(in) :: &
         instance, &
         of
@@ -307,6 +309,8 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
     dLp_dMp                                                                                         !< derivative of Lp with respect to Mandel stress
   real(pReal), dimension(3,3) :: &
     Mp                                                                                              !< Mandel stress work conjugate with Lp
+  real(pReal), dimension(3) :: &
+    h_n
   integer :: &
     ho, &                                                                                           !< homogenization
     tme                                                                                             !< thermal member position
@@ -316,6 +320,7 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
   ho = material_homogenizationAt(el)
   tme = thermalMapping(ho)%p(ip,el)
 
+  h_n = material_habitPlane(ipc,ip,el)%h_n
   Mp = matmul(matmul(transpose(Fi),Fi),S)
   of = material_phasememberAt(ipc,ip,el)
   instance = phase_plasticityInstance(material_phaseAt(ipc,el))
@@ -327,7 +332,7 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
       dLp_dMp = 0.0_pReal
 
     case (PLASTICITY_ISOTROPIC_ID) plasticityType
-      call plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
+      call plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,of)
 
     case (PLASTICITY_PHENOPOWERLAW_ID) plasticityType
       call plastic_phenopowerlaw_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)

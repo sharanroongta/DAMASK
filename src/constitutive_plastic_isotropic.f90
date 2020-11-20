@@ -143,7 +143,7 @@ module function plastic_isotropic_init() result(myPlasticity)
 !--------------------------------------------------------------------------------------------------
 ! allocate state arrays
     Nconstituents = count(material_phaseAt == p) * discretization_nIPs
-    sizeDotState = size(['xi     ','gamma   ','xi_2d   ','gamma_2d'])
+    sizeDotState = size(['xi      ','gamma   ','xi_2d   ','gamma_2d'])
     sizeState = sizeDotState
 
     call constitutive_allocateState(plasticState(p),Nconstituents,sizeState,sizeDotState,0)
@@ -191,7 +191,7 @@ end function plastic_isotropic_init
 !--------------------------------------------------------------------------------------------------
 !> @brief Calculate plastic velocity gradient and its tangent.
 !--------------------------------------------------------------------------------------------------
-module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
+module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,of)
 
   real(pReal), dimension(3,3),     intent(out) :: &
     Lp                                                                                              !< plastic velocity gradient
@@ -200,6 +200,8 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
 
   real(pReal), dimension(3,3), intent(in) :: &
     Mp                                                                                              !< Mandel stress
+  real(pReal), dimension(3),   intent(in) :: &
+    h_n
   integer,                     intent(in) :: &
     instance, &
     of
@@ -214,8 +216,8 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
     squarenorm_Mp_dev, &                                                                            !< square of the norm of the deviatoric part of the Mandel stress
     Mp_nn_2d, &
     Mp_ns_2d
-  real(pReal), dimension(3,1) :: &
-    hs                                                                         !direction vector of shear stress on the interface plane
+  real(pReal), dimension(3) :: &
+    h_s                                                                         !direction vector of shear stress on the interface plane
   integer :: &
     k, l, m, n
 
@@ -225,10 +227,16 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,instance,of)
   squarenorm_Mp_dev = math_tensordot(Mp_dev,Mp_dev)
   norm_Mp_dev = sqrt(squarenorm_Mp_dev)
 
+  proj_nrml = math_outer(h_n,h_n)
+  Mp_nn_2d= math_tensordot(Mp,proj_nrml)
+  Mp_ns_2d= norm2(matmul(Mp,h_n)-(Mp_nn_2d*h_n))
+  h_s= (matmul(Mp,h_n)-(Mp_nn_2d*h_n)) / Mp_ns_2d
+
   if (norm_Mp_dev > 0.0_pReal) then
     dot_gamma = prm%dot_gamma_0 * (sqrt(1.5_pReal) * norm_Mp_dev/(prm%M*stt%xi(of))) **prm%n
 
-    Lp = dot_gamma/prm%M * Mp_dev/norm_Mp_dev
+    dot_gamma_2d = prm%dot_gamma_0 * ( Mp_ns_2d/(prm%M_2d*stt%xi_2d(of))) **prm%n
+    Lp = dot_gamma/prm%M * Mp_dev/norm_Mp_dev + prm%phi * dot_gamma_2d/prm%M_2d * math_outer(h_s,h_n)
 #ifdef DEBUG
     if (debugConstitutive%extensive .and. (of == prm%of_debug .or. .not. debugConstitutive%selective)) then
       print'(/,a,/,3(12x,3(f12.4,1x)/))', '<< CONST isotropic >> Tstar (dev) / MPa', &
