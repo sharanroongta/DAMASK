@@ -79,9 +79,11 @@ module constitutive
       logical, dimension(:,:), allocatable  :: active_kinematics
     end function kinematics_active
 
-    module subroutine plastic_isotropic_dotState(Mp,instance,of)
+    module subroutine plastic_isotropic_dotState(Mp,h_n,instance,of)
       real(pReal), dimension(3,3),  intent(in) :: &
         Mp                                                                                          !< Mandel stress
+      real(pReal), dimension(3),    intent(in) :: &
+        h_n
       integer,                      intent(in) :: &
         instance, &
         of
@@ -762,6 +764,8 @@ function constitutive_collectDotState(S, FArray, Fi, FpArray, subdt, ipc, ip, el
     S                                                                                               !< 2nd Piola Kirchhoff stress (vector notation)
   real(pReal),              dimension(3,3) :: &
     Mp
+  real(pReal), dimension(3) :: &
+    h_n
   integer :: &
     ho, &                                                                                           !< homogenization
     tme, &                                                                                          !< thermal member position
@@ -773,12 +777,13 @@ function constitutive_collectDotState(S, FArray, Fi, FpArray, subdt, ipc, ip, el
   tme = thermalMapping(ho)%p(ip,el)
   instance = phase_plasticityInstance(phase)
 
+  h_n = material_habitPlane(ipc,ip,el)%h_n
   Mp = matmul(matmul(transpose(Fi),Fi),S)
 
   plasticityType: select case (phase_plasticity(phase))
 
     case (PLASTICITY_ISOTROPIC_ID) plasticityType
-      call plastic_isotropic_dotState(Mp,instance,of)
+      call plastic_isotropic_dotState(Mp,h_n,instance,of)
 
     case (PLASTICITY_PHENOPOWERLAW_ID) plasticityType
       call plastic_phenopowerlaw_dotState(Mp,instance,of)
