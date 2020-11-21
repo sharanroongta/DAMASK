@@ -250,11 +250,11 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,o
   proj_nrml = math_outer(h_n,h_n)
   Mp_nn_2d= math_tensordot(Mp,proj_nrml)
   Mp_ns_2d= norm2(matmul(Mp,h_n)-(Mp_nn_2d*h_n))
-  h_s= (matmul(Mp,h_n)-(Mp_nn_2d*h_n)) / Mp_ns_2d
 
   if (norm_Mp_dev > 0.0_pReal) then
     dot_gamma_3d = prm%dot_gamma_0 * (sqrt(1.5_pReal) * norm_Mp_dev/(prm%M*stt%xi_3d(of))) **prm%n
 
+    h_s= (matmul(Mp,h_n)-(Mp_nn_2d*h_n)) / Mp_ns_2d
     dot_gamma_2d = prm%dot_gamma_0 * ( Mp_ns_2d/(prm%M_2d*stt%xi_2d(of))) **prm%n
     dot_gamma = dot_gamma_3d + dot_gamma_2d
     Lp = dot_gamma_3d/prm%M * Mp_dev/norm_Mp_dev + prm%phi * dot_gamma_2d/prm%M_2d * math_outer(h_s,h_n)
