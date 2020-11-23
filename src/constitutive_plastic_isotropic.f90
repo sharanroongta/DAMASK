@@ -163,8 +163,8 @@ module function plastic_isotropic_init() result(myPlasticity)
 
     stt%gamma_3d  => plasticState(p)%state   (2,:)
     dot%gamma_3d  => plasticState(p)%dotState(2,:)
-    plasticState(p)%atol(4) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
-    if (plasticState(p)%atol(4) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma_3d'
+    plasticState(p)%atol(2) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
+    if (plasticState(p)%atol(2) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma_3d'
 
 
     stt%xi_2d  => plasticState(p)%state   (3,:)
@@ -173,22 +173,22 @@ module function plastic_isotropic_init() result(myPlasticity)
     plasticState(p)%atol(3) = pl%get_asFloat('atol_xi_2d',defaultVal=1.0_pReal)
     if (plasticState(p)%atol(3) < 0.0_pReal) extmsg = trim(extmsg)//' atol_xi_2d'
 
-    stt%gamma_3d  => plasticState(p)%state   (4,:)
-    dot%gamma_3d  => plasticState(p)%dotState(4,:)
-    plasticState(p)%atol(2) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
-    if (plasticState(p)%atol(2) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma'
+    stt%gamma_2d  => plasticState(p)%state   (4,:)
+    dot%gamma_2d  => plasticState(p)%dotState(4,:)
+    plasticState(p)%atol(4) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
+    if (plasticState(p)%atol(4) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma'
 
     stt%xi  => plasticState(p)%state   (5,:)
     stt%xi  =  xi_0 + xi_0_2d
     dot%xi  => plasticState(p)%dotState(5,:)
-    plasticState(p)%atol(1) = pl%get_asFloat('atol_xi',defaultVal=1.0_pReal)
-    if (plasticState(p)%atol(1) < 0.0_pReal) extmsg = trim(extmsg)//' atol_xi'
+    plasticState(p)%atol(5) = pl%get_asFloat('atol_xi',defaultVal=1.0_pReal)
+    if (plasticState(p)%atol(5) < 0.0_pReal) extmsg = trim(extmsg)//' atol_xi'
 
 
     stt%gamma  => plasticState(p)%state   (6,:)
     dot%gamma  => plasticState(p)%dotState(6,:)
-    plasticState(p)%atol(4) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
-    if (plasticState(p)%atol(4) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma'
+    plasticState(p)%atol(6) = pl%get_asFloat('atol_gamma',defaultVal=1.0e-6_pReal)
+    if (plasticState(p)%atol(6) < 0.0_pReal) extmsg = trim(extmsg)//' atol_gamma'
 
     ! global alias
     plasticState(p)%slipRate        => plasticState(p)%dotState(6:6,:)
@@ -426,6 +426,22 @@ module subroutine plastic_isotropic_results(instance,group)
       case ('xi')
         call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
                                     'resistance against plastic flow','Pa')
+      case ('xi_3d')
+        call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
+                                    'resistance against plastic flow for 3d','Pa')
+      case ('xi_2d')
+        call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
+                                   'resistance against plastic flow for 2d','Pa')
+      case ('gamma')
+        call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
+                                   'total plastic shear','1')
+      case ('gamma_3d')
+        call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
+                                   'plastic shear for 3d','1')
+      case ('gamma_2d')
+        call results_writeDataset(group,stt%xi,trim(prm%output(o)), &
+                                  'plastic shear for 2d','1')
+ 
     end select
   enddo outputsLoop
   end associate

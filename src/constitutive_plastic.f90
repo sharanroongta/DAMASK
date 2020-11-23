@@ -325,6 +325,7 @@ module subroutine constitutive_plastic_LpAndItsTangents(Lp, dLp_dS, dLp_dFi, &
   of = material_phasememberAt(ipc,ip,el)
   instance = phase_plasticityInstance(material_phaseAt(ipc,el))
 
+  
   plasticityType: select case (phase_plasticity(material_phaseAt(ipc,el)))
 
     case (PLASTICITY_NONE_ID) plasticityType

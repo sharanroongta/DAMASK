@@ -85,7 +85,7 @@ module material
   integer, dimension(:,:,:), allocatable, public, protected :: &                                    ! (constituent,IP,elem)
     material_phaseMemberAt                                                                          !< position of the element within its phase instance
 
-  type :: habit_plane
+  type, public :: habit_plane
     real(pReal), dimension(3),public :: h_n
   end type
   type(habit_plane), dimension(:,:,:), allocatable, public :: &

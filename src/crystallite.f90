@@ -614,7 +614,7 @@ function crystallite_stressTangent(c,i,e) result(dPdF)
           endif
           dLidS = math_mul3333xx3333(dLidFi,dFidS) + dLidS
         endif
-
+       
         call constitutive_LpAndItsTangents(devNull,dLpdS,dLpdFi, &
                                            crystallite_S (1:3,1:3,c,i,e), &
                                            crystallite_Fi(1:3,1:3,c,i,e),c,i,e)                     ! call constitutive law to calculate Lp tangent in lattice configuration
