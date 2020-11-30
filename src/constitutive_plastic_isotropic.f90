@@ -218,14 +218,14 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,o
  
   real(pReal), dimension(3,3) :: &
     Mp_dev, &                                                                                       !< deviatoric part of the Mandel stress
-    proj_nrml, &                                                                  !normal projection of tensor on the plane
-    Mp_nn_2d 
+    proj_nrml                                                                  !normal projection of tensor on the plane
   real(pReal) :: &
     dot_gamma, &                                                                                    !< strainrate
     dot_gamma_3d, &
     dot_gamma_2d, &
     norm_Mp_dev, &                                                                                  !< norm of the deviatoric part of the Mandel stress
     squarenorm_Mp_dev, &                                                                            !< square of the norm of the deviatoric part of the Mandel stress
+    Mp_nn_2d, & 
     Mp_ns_2d
   real(pReal), dimension(3) :: &
     h_s!, &                                                                         !direction vector of shear stress on the interface plane
@@ -240,16 +240,25 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,o
   norm_Mp_dev = sqrt(squarenorm_Mp_dev)
 
   proj_nrml = math_outer(h_n,h_n)
-  Mp_nn_2d= matmul(Mp,proj_nrml)
-  Mp_ns_2d= norm2(matmul(Mp,h_n)-matmul(Mp_nn_2d,h_n))
+  Mp_nn_2d= math_tensordot(Mp,proj_nrml)
+  Mp_ns_2d= norm2(matmul(Mp,h_n)-(Mp_nn_2d*h_n))
 
+
+  if(of ==1) then
+    write(6,*) 'Mp_ns_2d ', Mp_ns_2d
+    write(6,*) 'Mp_nn_2d ', Mp_nn_2d; flush(6)
+  end if
   if (norm_Mp_dev > 0.0_pReal) then
     dot_gamma_3d = prm%dot_gamma_0 * (sqrt(1.5_pReal) * norm_Mp_dev/(prm%M*stt%xi_3d(of))) **prm%n
-
-    h_s= (matmul(Mp,h_n)-matmul(Mp_nn_2d,h_n)) / Mp_ns_2d
     dot_gamma_2d = prm%dot_gamma_0 * ( Mp_ns_2d/(prm%M_2d*stt%xi_2d(of))) **prm%n
     dot_gamma = dot_gamma_3d + dot_gamma_2d
-    Lp = dot_gamma_3d/prm%M * Mp_dev/norm_Mp_dev + prm%phi * dot_gamma_2d/prm%M_2d * math_outer(h_s,h_n)
+
+    if(Mp_ns_2d == 0.0_pReal) then
+      Lp = dot_gamma_3d/prm%M * Mp_dev/norm_Mp_dev
+    else
+      h_s= (matmul(Mp,h_n)-(Mp_nn_2d*h_n)) / Mp_ns_2d
+      Lp = dot_gamma_3d/prm%M * Mp_dev/norm_Mp_dev + prm%phi * dot_gamma_2d/prm%M_2d * math_outer(h_s,h_n)
+    endif
 #ifdef DEBUG
     if (debugConstitutive%extensive .and. (of == prm%of_debug .or. .not. debugConstitutive%selective)) then
       print'(/,a,/,3(12x,3(f12.4,1x)/))', '<< CONST isotropic >> Tstar (dev) / MPa', &
@@ -322,21 +331,21 @@ module subroutine plastic_isotropic_dotState(Mp,h_n,instance,of)
   real(pReal) :: &
     dot_gamma, &                                                                                    !< strainrate
     xi_inf_star, &                                                                                  !< saturation xi
-    norm_Mp                                                                                         !< norm of the (deviatoric) Mandel stress
+    norm_Mp, &                                                                                         !< norm of the (deviatoric) Mandel stress
+    Mp_nn_2d, &                                                                                     !< normal stress on the plane(vahid)
+    Mp_ns_2d                                                                                        !< shear stress on the plane(vahid)
 
   real(pReal), dimension(3,3) :: &
-    proj_nrml, &                                                                                          !<normal projection tensor on the plane(vahid)
-    Mp_nn_2d                                                                                     !< normal stress on the plane(vahid)
+    proj_nrml                                                                                         !<normal projection tensor on the plane(vahid)
   real(pReal) :: &
     dot_gamma_3d, &
-    dot_gamma_2d, &                                                                                 !< strainrate in 2d system(vahid)
-    Mp_ns_2d                                                                                        !< shear stress on the plane(vahid)
+    dot_gamma_2d                                                                                  !< strainrate in 2d system(vahid)
 
   associate(prm => param(instance), stt => state(instance), dot => dotState(instance))
 
   proj_nrml = math_outer(h_n,h_n)
-  Mp_nn_2d= matmul(Mp,proj_nrml)
-  Mp_ns_2d= norm2(matmul(Mp,h_n)-matmul(Mp_nn_2d,h_n))
+  Mp_nn_2d= math_tensordot(Mp,proj_nrml)
+  Mp_ns_2d= norm2(matmul(Mp,h_n)-(Mp_nn_2d*h_n))
 
 
   if (prm%dilatation) then
@@ -350,6 +359,7 @@ module subroutine plastic_isotropic_dotState(Mp,h_n,instance,of)
   dot_gamma    = dot_gamma_3d + dot_gamma_2d
 
   if (dot_gamma > 1e-12_pReal) then
+    write(6,*) 'plastic_active '; flush(6)
     if (dEq0(prm%c_1)) then
       xi_inf_star = prm%xi_inf
     else
@@ -358,7 +368,7 @@ module subroutine plastic_isotropic_dotState(Mp,h_n,instance,of)
                   / prm%c_4 * (dot_gamma_3d / prm%dot_gamma_0)**(1.0_pReal / prm%n)
     endif
     dot%xi_3d(of) = dot_gamma_3d &
-               * ( prm%h_0 + prm%h_ln * log(dot_gamma_3d) ) &
+               * ( prm%h_0) &
                * abs( 1.0_pReal - stt%xi_3d(of)/xi_inf_star )**prm%a &
                * sign(1.0_pReal, 1.0_pReal - stt%xi_3d(of)/xi_inf_star)
 

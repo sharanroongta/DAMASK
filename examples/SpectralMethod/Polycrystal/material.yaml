@@ -9,8 +9,8 @@ material:
     constituents:
       - phase: Reduced martensite
         fraction: 1.0
-        O: [0.7198552162491295, -0.2667007930247191, 0.04845019903241929, 0.639008398108056]
-        h_n: [1, 1, 1]
+        O: [1.0,0.0,0.0,0.0]
+        h_n: [0, 1, 0]
 phase:
   Reduced martensite:
     lattice: iso
@@ -20,11 +20,11 @@ phase:
     plasticity:
       a: 1.5
       atol_xi: 1.0
-      dot_gamma_0: 0.001
+      dot_gamma_0: 0.01
       h_0: 10000e6
       h_0_2d: 1500e6
       n: 10
-      M: 2.5
+      M: 3.0
       M_2d: 1.10
       phi: 0.05
       output: [xi_3d, gamma_3d, xi_2d, gamma_2d, gamma]

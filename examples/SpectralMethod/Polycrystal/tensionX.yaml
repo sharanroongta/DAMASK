@@ -2,13 +2,13 @@
 
 step:
   - mech:
-      dot_F: [1.0e-4, 0,      0,
-              0, x, 0,
-              0, 0,      x]
+      dot_F: [0, 1.0e-2,      0,
+              0, 0, 0,
+              0, 0,      0]
       P: [x, x, x,
-          x, 0, x,
-          x, x, 0]
+          x, x, x,
+          x, x, x]
     discretization:
       t: 10
-      N: 10000
+      N: 1000
       f_out: 40
