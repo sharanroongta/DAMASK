@@ -244,10 +244,6 @@ module subroutine plastic_isotropic_LpAndItsTangent(Lp,dLp_dMp,Mp,h_n,instance,o
   Mp_ns_2d= norm2(matmul(Mp,h_n)-(Mp_nn_2d*h_n))
 
 
-  if(of ==1) then
-    write(6,*) 'Mp_ns_2d ', Mp_ns_2d
-    write(6,*) 'Mp_nn_2d ', Mp_nn_2d; flush(6)
-  end if
   if (norm_Mp_dev > 0.0_pReal) then
     dot_gamma_3d = prm%dot_gamma_0 * (sqrt(1.5_pReal) * norm_Mp_dev/(prm%M*stt%xi_3d(of))) **prm%n
     dot_gamma_2d = prm%dot_gamma_0 * ( Mp_ns_2d/(prm%M_2d*stt%xi_2d(of))) **prm%n
@@ -359,7 +355,6 @@ module subroutine plastic_isotropic_dotState(Mp,h_n,instance,of)
   dot_gamma    = dot_gamma_3d + dot_gamma_2d
 
   if (dot_gamma > 1e-12_pReal) then
-    write(6,*) 'plastic_active '; flush(6)
     if (dEq0(prm%c_1)) then
       xi_inf_star = prm%xi_inf
     else
