@@ -1,33 +1,627 @@
----
 homogenization:
   SX:
     N_constituents: 1
     mech: {type: none}
 
 material:
-  - homogenization: SX
-    constituents:
-      - phase: Reduced martensite
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
         fraction: 1.0
-        O: [1.0,0.0,0.0,0.0]
-        h_n: [0, 1, 0]
+        h_n: [0.576827, 0.816866, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.862536, 0.505996, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.600066, 0.799951, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.299585, 0.95407, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.361615, 0.932328, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.797474, 0.603354, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.786213, 0.617955, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.761611, 0.648035, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.901124, 0.433562, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.554607, 0.832112, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.932293, 0.361704, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.792633, 0.609699, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.458613, 0.888636, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.11985, 0.992792, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.63459, 0.772849, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.832095, 0.554634, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.678406, 0.734687, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.844228, 0.535985, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.866756, 0.498732, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.081582, 0.996667, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.983377, 0.181573, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.938481, 0.34533, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.946989, 0.321266, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.511718, 0.859153, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.637711, 0.770276, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.915565, 0.402169, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.858663, 0.51254, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.846388, 0.532567, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.254866, 0.966976, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.993187, 0.116533, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.983838, 0.179058, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.819477, 0.573112, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.240686, 0.970603, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.992712, 0.120511, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.273564, 0.961854, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.772447, 0.635079, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.788037, 0.615627, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.70148, 0.712689, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.991788, 0.127895, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.778135, 0.628097, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.922358, 0.386336, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.94531, 0.326172, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.222728, 0.974881, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.599017, 0.800736, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.98894, 0.148315, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.841454, 0.540329, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.894568, 0.446932, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.999417, 0.034137, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.226921, 0.973913, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.212388, 0.977185, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.803764, 0.594948, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.71899, 0.695021, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.248015, 0.968756, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.453635, 0.891188, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.621977, 0.783035, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.016031, 0.999871, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.961536, 0.274679, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.999969, 0.007862, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.805391, 0.592745, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.33922, 0.940707, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.918351, 0.395766, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.99374, 0.11172, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.591731, 0.806136, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.784546, 0.62007, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.99992, 0.012614, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.80145, 0.598061, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.691571, 0.722308, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.154952, 0.987922, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.72727, 0.686351, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.88921, 0.457499, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.430122, 0.902771, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.652929, 0.757419, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.977555, 0.210682, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.542913, 0.839789, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.337547, 0.941309, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.900407, 0.435048, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.540521, 0.841331, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.9968, 0.079932, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.748135, 0.663546, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.238922, 0.971039, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.886474, 0.462778, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.803654, 0.595097, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.999452, 0.033114, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.402389, 0.915469, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.566548, 0.824029, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.823006, 0.568032, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.994328, 0.106353, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.269798, 0.962917, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.993758, 0.111553, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.784417, 0.620234, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.999758, 0.022, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.877371, 0.479813, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.994393, 0.105751, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.997769, 0.066763, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.788684, 0.614799, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.583253, 0.812291, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.755585, 0.65505, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.620637, 0.784098, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.401979, 0.915649, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+  - constituents:
+      - O: [1.0, 0.0, 0.0, 0.0]
+        fraction: 1.0
+        h_n: [0.916627, 0.399743, 0.0]
+        phase: Reduced martensite
+    homogenization: SX
+
 phase:
   Reduced martensite:
-    lattice: iso
     elasticity: {C_11: 283.0e9, C_12: 121.0e9, C_44: 81.0e9, type: hooke}
     generic:
       output: [F, P, F_e, F_p, L_p, O]
+    lattice: iso
     plasticity:
+      M: 3.0
+      M_2d: 1.1
       a: 1.5
       atol_xi: 1.0
       dot_gamma_0: 0.01
       h_0: 10000e6
       h_0_2d: 1500e6
-      n: 10
-      M: 3.0
-      M_2d: 1.10
-      phi: 0.05
+      n: 60
       output: [xi_3d, gamma_3d, xi_2d, gamma_2d, gamma]
+      phi: 0.05
       type: isotropic
       xi_0: 850e6
       xi_0_2d: 360e6
