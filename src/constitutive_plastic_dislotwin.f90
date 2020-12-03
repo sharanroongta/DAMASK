@@ -718,9 +718,9 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
     flush(6)
   endif
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
-  !write(6,*) 'tau_bar',tau_bar
+  write(6,*) 'tau_bar',tau_bar; flush(6)
   Delta_t_bar  = abs((prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B)        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
-  !write(6,*) 'Delta_T_bar',Delta_t_bar
+  write(6,*) 'Delta_T_bar',Delta_t_bar; flush(6)
 
   do i = 1, prm%sum_N_sl
     if (abs(tau_bar(i)) < 1E-05 .AND. Delta_t_bar(i) < 1E-05) then
@@ -728,20 +728,21 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
       dot_h(i) = 0.0
     else 
       call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
-      !write(6,*) 'no newton rhapson called'
-      !flush(6)
+       write(6,*) 'no newton rhapson called'
+       flush(6)
                                                                                                                 ! dot_h always initiazed as 0
 
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
    !   math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
-      dot_h(i) = 0.0_pReal
-      dot_gamma_sl(i) = 0.0_pReal
-      !dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
-      !dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
-      !            (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
+      !dot_h(i) = 0.0_pReal
+      !dot_gamma_sl(i) = 0.0_pReal
+      dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
+      dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+                  (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
     endif
   enddo
 
+  if(of == 1) write(6,*) 'gamma_sl ', dot_gamma_sl; flush(6)
   ddot_gamma_dtau = 0.0_pReal
 
   end associate
