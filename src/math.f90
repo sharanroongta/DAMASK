@@ -127,41 +127,44 @@ function Abar(h)
   real(pReal) ::  Abar
 
   if (abs(h)>0) then
-     Abar=(1 + 4*(h**2))**2/(16.*(h**2))
+     Abar=(1.0_pReal + 4.0_pReal*(h**2.0_pReal))**2.0_pReal/(16.0_pReal*(h**2.0_pReal))
 
-     if (abs(h)>0.0 .AND. abs(h)<0.5) then
-       Abar=Abar*(2*asin((4*h)/(1 + 4*(h**2))) - sin(2*asin((4*h)/(1 + 4*(h**2)))))
-     else if (h<=-0.5) then
-            Abar=Abar*(-2*(PI + asin((4*h)/(1 + 4*(h**2)))) + sin(2*asin((4*h)/(1 + 4*(h**2)))))
-     else if (h>=0.5) Then
-            Abar=Abar*(PI + 2*acos((4*h)/(1 + 4*(h**2))) + sin(2*acos((4*h)/(1 + 4*(h**2)))))
+     if (abs(h)>0.0_pReal .AND. abs(h)<0.5_pReal) then
+       Abar=Abar*(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) - &
+                                 sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
+     else if (h<=-0.5_pReal) then
+            Abar=Abar*(-2.0_pReal*(PI + asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))) +&
+                                  sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
+     else if (h>0.5_pReal) Then
+            Abar=Abar*(PI + 2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) + &
+                                      sin(2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
      end if
-    else 
-            Abar=0.0
-    endif
+  else 
+     Abar=0.0_pReal
+  endif
 
-    Abar=Abar*(1/PI)        
+    Abar=Abar*(1.0_pReal/PI)        
 
 end function Abar
 
 
-Real function f_anelastic(taubar,deltatbar,hold,hnew)             ! EQ. 17 to crystallite.f90  
+function f_anelastic(taubar,deltatbar,hold,hnew)             ! EQ. 17 to crystallite.f90  
 
-   IMPLICIT NONE
-   complex       :: sqrt_term
-   complex       :: fimag
-   real, intent(in)     :: taubar
-   real, intent(in)     :: deltatbar
-   real, intent(in)     :: hold
-   real, intent(in)     :: hnew
+   complex(pReal)              :: sqrt_term
+   complex(pReal)              :: fimag
+   real(pReal), intent(in)     :: taubar
+   real(pReal), intent(in)     :: deltatbar
+   real(pReal), intent(in)     :: hold
+   real(pReal), intent(in)     :: hnew
+   real(pReal)                 :: f_anelastic
 
-   sqrt_term = Sqrt(Cmplx(-1 + taubar**2))
+   sqrt_term = Sqrt(Cmplx(-1.0_pReal + taubar**2.0_pReal))
    fimag =  -deltatbar + (taubar*(hnew - hold - &
-            ATan((-1 + 2*hold*taubar)/sqrt_term)/(sqrt_term*taubar) + &
-            ATAN((-1 + 2*hnew*taubar)/sqrt_term)/(sqrt_term*taubar) + &
-            Log(Cmplx((-4*hnew + taubar + 4*hnew**2*taubar)/ &
-              (-4*hold + taubar + 4*hold**2*taubar)))  &
-               /(2.*taubar)))/Abs(taubar)
+            ATan((-1.0_pReal + 2.0_pReal*hold*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            ATAN((-1.0_pReal + 2.0_pReal*hnew*taubar)/sqrt_term)/(sqrt_term*taubar) + &
+            Log(Cmplx((-4-0_pReal*hnew + taubar + 4.0_pReal*hnew**2.0_pReal*taubar)/ &
+              (-4.0_pReal*hold + taubar + 4.0_pReal*hold**2.0_pReal*taubar)))  &
+               /(2.0_pReal*taubar)))/Abs(taubar)
    f_anelastic=dble(fimag)
 
 end function f_anelastic
@@ -174,7 +177,8 @@ function f_prime(tau_bar,h_new)
 
   real(pReal) :: f_prime
 
-  f_prime = abs(tau_bar*(1 + 4*(h_new**2)))/(tau_bar - 4*h_new + 4*tau_bar*(h_new**2))
+  f_prime = abs(tau_bar*(1.0_pReal + 4.0_pReal*(h_new**2.0_pReal)))/&
+               (tau_bar - 4.0_pReal*h_new + 4.0_pReal*tau_bar*(h_new**2.0_pReal))
 
 end function f_prime
 
@@ -194,9 +198,9 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   integer     :: max_iter, &
                  i
 
-  delta = 0.001
-  error = 0.00001
-  max_iter = 1 !100000
+  delta = 0.001_pReal
+  error = 0.0001_pReal
+  max_iter = 10000
   ! Begin the iteration up to the maximum number specified
   root = start
 
@@ -205,17 +209,17 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   !write(6,*) 'tau_bar_NR',tau_bar
   !write(6,*) 'h_old',h_old
   !write(6,*) 'root',root
-  flush(6)
   do i = 1, max_iter
      f_val = f_anelastic(tau_bar,Delta_t,h_old,root)
-    !  print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val 
+     print '(2(A,E15.6))',"$h_{n^\prime}$ =", root," f\left(\bar{h}_{n^\prime}\right) =", f_val ; flush(6)
      if(abs(f_val ) <= error) then
        ! A root has been found
+       write(6,*) 'root has been found' ; flush(6)
        return
      end if
      f_der = f_prime(tau_bar,root)
    !     print '(2(A,E15.6))', "root =", root," f'\left(\bar{h}_{n^\prime}\right) =", f_der
-     if(f_der == 0.0_pReal) then
+     if(dEq0(f_der)) then
        ! f'(x)=0 so no more iterations are possible
        return
      end if
@@ -223,7 +227,7 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
      root = root - delta*(f_val/f_der)                         ! EQ. 21
   !   print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
   end do
-  print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i
+  print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i; flush(6)
 
 end subroutine math_newton_rhaphson
 
