@@ -723,11 +723,8 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   write(6,*) 'Delta_T_bar',Delta_t_bar; flush(6)
 
   do i = 1, prm%sum_N_sl
-    if (abs(tau_bar(i)) < 1E-05 .AND. Delta_t_bar(i) < 1E-05) then
-      dot_gamma_sl(i) = 0.0
-      dot_h(i) = 0.0
-    else 
-      call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
+      if(dNeq0(Delta_t_bar(i))) then
+       call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
        write(6,*) 'no newton rhapson called'
        flush(6)
                                                                                                                 ! dot_h always initiazed as 0
@@ -742,7 +739,10 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
     endif
   enddo
 
-  if(of == 1) write(6,*) 'gamma_sl ', dot_gamma_sl; flush(6)
+  if(of == 1) then
+    write(6,*) 'gamma_sl ', dot_gamma_sl
+    write(6,*) 'dot_h ', dot_h; flush(6)
+  endif
   ddot_gamma_dtau = 0.0_pReal
 
   end associate

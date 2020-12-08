@@ -198,7 +198,7 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   integer     :: max_iter, &
                  i
 
-  delta = 0.001_pReal
+  delta = 0.0001_pReal
   error = 0.0001_pReal
   max_iter = 10000
   ! Begin the iteration up to the maximum number specified
