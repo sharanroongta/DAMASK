@@ -126,24 +126,25 @@ function Abar(h)
 
   real(pReal) ::  Abar
 
-  if (abs(h)>0) then
-     Abar=(1.0_pReal + 4.0_pReal*(h**2.0_pReal))**2.0_pReal/(16.0_pReal*(h**2.0_pReal))
+  if (abs(h)>0.0_pReal) then
+     Abar = (1.0_pReal + 4.0_pReal*(h**2.0_pReal))/(4.0_pReal *h)
+     Abar = Abar**2
 
      if (abs(h)>0.0_pReal .AND. abs(h)<0.5_pReal) then
-       Abar=Abar*(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) - &
+       Abar = Abar*(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) - &
                                  sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
-     else if (h<=-0.5_pReal) then
-            Abar=Abar*(-2.0_pReal*(PI + asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))) +&
+     else if (h<= -0.5_pReal) then
+            Abar = Abar*(-2.0_pReal*(PI + asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))) +&
                                   sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
      else if (h>0.5_pReal) Then
-            Abar=Abar*(PI + 2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) + &
+            Abar = Abar*(PI + 2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) + &
                                       sin(2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
      end if
   else 
-     Abar=0.0_pReal
+     Abar = 0.0_pReal
   endif
 
-    Abar=Abar*(1.0_pReal/PI)        
+  Abar = Abar*(1.0_pReal/PI)        
 
 end function Abar
 
@@ -188,7 +189,7 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   real(pReal),    intent(in)  :: Delta_t
   real(pReal),    intent(in)  :: tau_bar
   real(pReal),    intent(in)  :: h_old
-  real(pReal),    intent(out) :: root
+  real(pReal),    intent(inout) :: root
 
   real(pReal) :: delta, &
                  error, &
