@@ -730,7 +730,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
          flush(6)
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
          dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
-         dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+         dot_gamma_sl(i)  = (PI/8.0)*(prm%mu/prm%B(i))*(prm%b_sl(i)**3*(stt%rho_mob(i,of)**(3/2)))* &
                   (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
        endif
   enddo
