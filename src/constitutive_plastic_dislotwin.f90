@@ -719,21 +719,19 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   endif
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
   write(6,*) 'tau_bar',tau_bar; flush(6)
-  Delta_t_bar  = abs((prm%b_sl*subdt*tau*alpha_coefficient*sqrt(stt%rho_mob(:,of)))/prm%B)        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
+  Delta_t_bar  = (prm%b_sl**2)*(alpha_coefficient**2)*stt%rho_mob(:,of)*prm%mu*subdt/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
   write(6,*) 'Delta_T_bar',Delta_t_bar; flush(6)
 
   do i = 1, prm%sum_N_sl
-      if(dNeq0(Delta_t_bar(i))) then
-       call  math_newton_rhaphson(stt%h(i,of),Delta_t_bar(i),tau_bar(i),stt%h(i,of),h_new(i)) 
-       write(6,*) 'no newton rhapson called'
-       flush(6)
-                                                                                                                ! dot_h always initiazed as 0
-
+       if(dNeq0(Delta_t_bar(i))) then
+         call  math_explicit_solver(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i)) 
+         write(6,*) 'h_new ', h_new
+         flush(6)
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
-      dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
-      dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
+         dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
+         dot_gamma_sl(i)  = (PI/8.0)*(tau(i)/prm%B(i))*(prm%b_sl(i)**2*stt%rho_mob(i,of))* &
                   (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
-    endif
+       endif
   enddo
 
   if(of == 1) then
