@@ -254,7 +254,7 @@ function hp(h,dt,dh)
   real(pReal), intent(in) :: dh
   real(pReal)             :: hp
 
-  hp = h + dt + dh
+  hp = h+ dt*dh
 
 end function hp
 
@@ -287,6 +287,8 @@ subroutine Predictor_Corrector(hin,dt,taubar,hout,error)
   dhpi  = dh(hpi,taubar)
   hout  = he(hin,dt,dhi,dhpi)
   error = abs(hout - hpi)
+
+  write(6,*) dhi, hpi, dhpi, hout; flush(6)
 
 end subroutine Predictor_Corrector
 

@@ -700,9 +700,11 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
     h_new, &
     alpha_coefficient
   integer :: i
+  real(pReal) :: errorout
 
   associate(prm => param(instance), stt => state(instance), dst => dependentState(instance))
-
+  
+  h_new(:) = 0.0_pReal
   dot_h = 0.0_pReal
   alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
   !write(6,*) 'material point ID',of
@@ -724,8 +726,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
 
   do i = 1, prm%sum_N_sl
        if(dNeq0(Delta_t_bar(i))) then
-         call  math_explicit_solver(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i)) 
-         write(6,*) 'h_new ', h_new
+         call  Predictor_Corrector(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i),errorout) 
          flush(6)
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
          dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
@@ -734,6 +735,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
        endif
   enddo
 
+  write(6,*) 'h_new ', h_new
   if(of == 1) then
     write(6,*) 'gamma_sl ', dot_gamma_sl
     write(6,*) 'dot_h ', dot_h; flush(6)
