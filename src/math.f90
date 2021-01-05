@@ -126,24 +126,25 @@ function Abar(h)
 
   real(pReal) ::  Abar
 
-  if (abs(h)>0) then
-     Abar=(1.0_pReal + 4.0_pReal*(h**2.0_pReal))**2.0_pReal/(16.0_pReal*(h**2.0_pReal))
+  if (abs(h)>0.0_pReal) then
+     Abar = (1.0_pReal + 4.0_pReal*(h**2.0_pReal))/(4.0_pReal *h)
+     Abar = Abar**2
 
      if (abs(h)>0.0_pReal .AND. abs(h)<0.5_pReal) then
-       Abar=Abar*(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) - &
+       Abar = Abar*(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) - &
                                  sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
-     else if (h<=-0.5_pReal) then
-            Abar=Abar*(-2.0_pReal*(PI + asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))) +&
+     else if (h<= -0.5_pReal) then
+            Abar = Abar*(-2.0_pReal*(PI + asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))) +&
                                   sin(2.0_pReal*asin((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
      else if (h>0.5_pReal) Then
-            Abar=Abar*(PI + 2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) + &
+            Abar = Abar*(PI + 2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal))) + &
                                       sin(2.0_pReal*acos((4.0_pReal*h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)))))
      end if
   else 
-     Abar=0.0_pReal
+     Abar = 0.0_pReal
   endif
 
-    Abar=Abar*(1.0_pReal/PI)        
+  Abar = Abar*(1.0_pReal/PI)        
 
 end function Abar
 
@@ -188,7 +189,7 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   real(pReal),    intent(in)  :: Delta_t
   real(pReal),    intent(in)  :: tau_bar
   real(pReal),    intent(in)  :: h_old
-  real(pReal),    intent(out) :: root
+  real(pReal),    intent(inout) :: root
 
   real(pReal) :: delta, &
                  error, &
@@ -198,7 +199,7 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   integer     :: max_iter, &
                  i
 
-  delta = 0.001_pReal
+  delta = 0.0001_pReal
   error = 0.0001_pReal
   max_iter = 10000
   ! Begin the iteration up to the maximum number specified
@@ -230,6 +231,82 @@ subroutine math_newton_rhaphson(start,Delta_t,tau_bar,h_old,root)
   print *, "$h_{n^\prime+1}$ =", root," at non-dimensional iterant $n^\prime$ =", i; flush(6)
 
 end subroutine math_newton_rhaphson
+
+
+!---------------------------------------------------------------------------------------------
+!> Predictor-Corrector
+!---------------------------------------------------------------------------------------------
+function dh(h,tau)
+
+  real(pReal), intent(in) :: h
+  real(pReal), intent(in) :: tau
+  real(pReal)             :: dh
+
+  dh = (-4.0_pReal * h)/(1.0_pReal + 4.0_pReal*(h**2.0_pReal)) + tau
+
+end function dh
+
+
+function hp(h,dt,dh)
+
+  real(pReal), intent(in) :: h
+  real(pReal), intent(in) :: dt
+  real(pReal), intent(in) :: dh
+  real(pReal)             :: hp
+
+  hp = h+ dt*dh
+
+end function hp
+
+
+function he(h,dt,dhin,dhpn)
+
+  real(pReal), intent(in) :: h
+  real(pReal), intent(in) :: dt
+  real(pReal), intent(in) :: dhin
+  real(pReal), intent(in) :: dhpn
+  real(pReal)             :: he
+
+  he = h + dt*(dhin + dhpn)/2
+
+end function he
+
+
+subroutine Predictor_Corrector(hin,dt,taubar,hout,error)
+
+  real(pReal), intent(in)  :: hin
+  real(pReal), intent(in)  :: dt
+  real(pReal), intent(in)  :: taubar
+  real(pReal), intent(out) :: hout
+  real(pReal), intent(out) :: error
+
+  real(pReal) :: dhi, hpi, dhpi
+
+  dhi   = dh(hin,taubar)
+  hpi   = hp(hin,dt,dhi)
+  dhpi  = dh(hpi,taubar)
+  hout  = he(hin,dt,dhi,dhpi)
+  error = abs(hout - hpi)
+
+  write(6,*) dhi, hpi, dhpi, hout; flush(6)
+
+end subroutine Predictor_Corrector
+
+subroutine math_explicit_solver(start,Delta_t,tau_bar,root)
+
+  real(pReal),    intent(in)  :: start
+  real(pReal),    intent(in)  :: Delta_t
+  real(pReal),    intent(in)  :: tau_bar
+  real(pReal),    intent(inout) :: root
+
+  real(pReal) :: errorout, &
+                 dt
+
+  dt = Delta_t
+  call Predictor_Corrector(start, dt, tau_bar, root,errorout)
+  write(6,*) 'root is ', root
+ 
+end subroutine math_explicit_solver
 
 !--------------------------------------------------------------------------------------------------
 !> @brief Sorting of two-dimensional integer arrays
