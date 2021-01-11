@@ -726,8 +726,7 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
 
   do i = 1, prm%sum_N_sl
        if(dNeq0(Delta_t_bar(i))) then
-         call  Predictor_Corrector(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i),errorout) 
-         flush(6)
+         call  math_explicit_solver(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i)) 
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
          dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
          dot_gamma_sl(i)  = (PI/8.0)*(prm%mu/prm%B(i))*(alpha_coefficient(i)*prm%b_sl(i)**3*(stt%rho_mob(i,of)**(3/2)))* &
