@@ -302,11 +302,11 @@ subroutine math_explicit_solver(start,Delta_t,tau_bar,root)
           dt,       &
           root_,    &
           start_,   &
-          epsilon, &
+          epsilon_, &
           dt_total
 
   dt_total=0. 
-  epsilon = 0.001
+  epsilon_ = 0.0001
 
   dt = Delta_t
   root_=start
@@ -315,7 +315,7 @@ subroutine math_explicit_solver(start,Delta_t,tau_bar,root)
   DO
           Call Predictor_Corrector(start, dt, tau_bar, root_, errorout)
          ! print *,"dt, dt_total, errorout", dt, dt_total, errorout
-          IF ((errorout<epsilon).AND.(dt_total>Delta_t)) THEN
+          IF ((errorout<epsilon_).AND.(dt_total>=Delta_t)) THEN
                   dt=dt-(dt_total-Delta_t)
           !        print *, dt
                   Call Predictor_Corrector(start, dt, tau_bar, root_, errorout)
@@ -323,7 +323,7 @@ subroutine math_explicit_solver(start,Delta_t,tau_bar,root)
                   EXIT
           ENDIF
 
-          IF (errorout>=epsilon) THEN
+          IF (errorout>=epsilon_) THEN
                   dt=dt/2
           ELSE
                   start_ = root_
