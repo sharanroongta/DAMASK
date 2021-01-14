@@ -653,6 +653,9 @@ module subroutine plastic_dislotwin_results(instance,group)
       case('gamma_sl')
         if(prm%sum_N_sl>0) call results_writeDataset(group,stt%gamma_sl,trim(prm%output(o)), &
                                                      'plastic shear','1')
+      case('tau_pass')
+        if(prm%sum_N_sl>0) call results_writeDataset(group,dst%tau_pass,trim(prm%output(o)), &
+                                                     'passing stress for slip','Pa')
  
       case('h_sl')
         if(prm%sum_N_sl>0) call results_writeDataset(group,stt%h,trim(prm%output(o)), &
@@ -708,39 +711,25 @@ subroutine kinetics_slip(Mp,T,subdt,instance,of, &
   h_new(:) = 0.0_pReal
   dot_h = 0.0_pReal
   alpha_coefficient = dst%tau_pass(:,of)/(prm%mu*prm%b_sl*sqrt(stt%rho_mob(:,of)+stt%rho_dip(:,of)))
-  !write(6,*) 'material point ID',of
-  !write(6,*) 'alpha_coeff',alpha_coefficient
-  !write(6,*) 'subdt --- ',subdt
   
   do i = 1, prm%sum_N_sl
     tau(i) = math_tensordot(Mp,prm%P_sl(1:3,1:3,i))
   enddo
 
-  if (of == 1) then
-    write(6,*) 'tau',tau
-    flush(6)
-  endif
   tau_bar = tau/(prm%b_sl*prm%mu*alpha_coefficient*sqrt(stt%rho_mob(:,of)))
-  write(6,*) 'tau_bar',tau_bar; flush(6)
   Delta_t_bar  = (prm%b_sl**2)*(alpha_coefficient**2)*stt%rho_mob(:,of)*prm%mu*subdt/prm%B        ! are you sure its time_step here? The equation in the paper says 't', and not 'dt or delta t'?
-  write(6,*) 'Delta_T_bar',Delta_t_bar; flush(6)
 
   do i = 1, prm%sum_N_sl
        if(dNeq0(Delta_t_bar(i))) then
          call  math_explicit_solver(stt%h(i,of),Delta_t_bar(i),tau_bar(i),h_new(i)) 
 !! m  y guess is the commented line below should be fine..starting point of newton rhapson is the last converged point for h? 
          dot_h(i)   = (h_new(i) - stt%h(i,of))/subdt                                                            ! vectorize later 
-         dot_gamma_sl(i)  = (PI/8.0)*(prm%mu/prm%B(i))*(alpha_coefficient(i)*prm%b_sl(i)**3*(stt%rho_mob(i,of)**(3/2)))* &
+         dot_gamma_sl(i)  = (PI/8.0)*(prm%mu/prm%B(i))*(alpha_coefficient(i) &
+                               *prm%b_sl(i)**3*(stt%rho_mob(i,of)**(3/2)))* &
                   (Abar(h_new(i))-Abar(stt%h(i,of)))/Delta_t_bar(i)
        endif
   enddo
 
-  write(6,*) 'h_new ', h_new
-  if(of == 1) then
-    write(6,*) 'stt_h ', stt%h
-    write(6,*) 'gamma_sl ', dot_gamma_sl
-    write(6,*) 'dot_h ', dot_h; flush(6)
-  endif
   ddot_gamma_dtau = 0.0_pReal
   dot_h_slip      = dot_h
   end associate
