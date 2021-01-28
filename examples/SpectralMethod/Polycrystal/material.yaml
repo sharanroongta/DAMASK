@@ -9,7 +9,9 @@ material:
     constituents:
       - phase: Aluminum
         fraction: 1.0
-        O: [1.0, 0.0, 0.0, 0.0]
+       # O: [0.7045563426109882, -0.06000300064686598, 0.45576803893928264, 0.540625096237162] #inverse/transpose(a,b)
+       # O: [1.0,0.0,0.0,0.0]
+        O: [0.7045563426109882, 0.06000300064686598, -0.45576803893928264, -0.540625096237162] #correct (b,a) # [01-1](111)
   - homogenization: SX
     constituents:
       - phase: Aluminum
@@ -120,7 +122,7 @@ phase:
       Gamma_sf_0K: -0.0396
       L_tr: 442.0
       L_tw: 442.0
-      N_sl: [12]
+      N_sl: [1]
       N_tr: [0]
       N_tw: [0]
       Q_cl: 4.5e-19
@@ -146,7 +148,7 @@ phase:
       i_sl: [10.0]
       i_tw: 1.0
       maxTwinFraction: 1.0
-      output: [rho_mob, rho_dip, gamma_sl, Lambda_sl, tau_pass, f_tw, Lambda_tw, tau_hat_tw, f_tr]
+      output: [rho_mob, rho_dip, gamma_sl, h_sl, Lambda_sl, tau_pass, f_tw, Lambda_tw, tau_hat_tw, f_tr]
       p_sb: 1.0
       p_sl: [0.32]
       p_tw: [10.0]
