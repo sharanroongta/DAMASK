@@ -113,7 +113,7 @@ phase:
       output: [F, P, F_e, F_p, L_p, O]
     lattice: fcc
     plasticity:
-      B: [0.1]
+      B: [1.0e-2]
       D: 2.0e-05
       D_0: 4.0e-05
       D_a: 1.0
@@ -152,8 +152,8 @@ phase:
       p_tw: [10.0]
       q_sb: 1.0
       q_sl: [1.46]
-      rho_dip_0: [1.0e12]
-      rho_mob_0: [1.0e12]
+      rho_dip_0: [1.0e14]
+      rho_mob_0: [1.0e14]
       h_0: [0.0] 
       t_tr: [1.0e-07]
       t_tw: [5.0e-08]

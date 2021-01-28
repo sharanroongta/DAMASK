@@ -281,31 +281,56 @@ subroutine Predictor_Corrector(hin,dt,taubar,hout,error)
   real(pReal), intent(out) :: error
 
   real(pReal) :: dhi, hpi, dhpi
-
+  
   dhi   = dh(hin,taubar)
   hpi   = hp(hin,dt,dhi)
   dhpi  = dh(hpi,taubar)
   hout  = he(hin,dt,dhi,dhpi)
   error = abs(hout - hpi)
 
-  write(6,*) dhi, hpi, dhpi, hout; flush(6)
 
 end subroutine Predictor_Corrector
 
 subroutine math_explicit_solver(start,Delta_t,tau_bar,root)
 
-  real(pReal),    intent(in)  :: start
-  real(pReal),    intent(in)  :: Delta_t
-  real(pReal),    intent(in)  :: tau_bar
-  real(pReal),    intent(inout) :: root
+  real, intent(in)  :: start
+  real, intent(in)  :: Delta_t
+  real, intent(in)  :: tau_bar
+  real, intent(inout) :: root
 
-  real(pReal) :: errorout, &
-                 dt
+  real :: errorout, &
+          dt,       &
+          root_,    &
+          start_,   &
+          epsilon_, &
+          dt_total
+
+  dt_total=0. 
+  epsilon_ = 0.01
 
   dt = Delta_t
-  call Predictor_Corrector(start, dt, tau_bar, root,errorout)
-  write(6,*) 'root is ', root
- 
+  root_=start
+  start_= start
+
+  DO
+          Call Predictor_Corrector(start_, dt, tau_bar, root_, errorout)
+          !print *,"dt, dt_total, errorout", dt, dt_total, errorout
+          IF ((errorout<epsilon_).AND.(dt_total>=Delta_t)) THEN
+                  dt=dt-(dt_total-Delta_t)
+                  Call Predictor_Corrector(start_, dt, tau_bar, root_, errorout)
+                  root=root_
+                  EXIT
+          ENDIF
+
+          IF (errorout>=epsilon_) THEN
+                  dt=dt/2
+          ELSE
+                  start_ = root_
+                  dt_total=dt_total+dt        
+                  dt=MIN(dt*sqrt(2.),Delta_t)
+          END IF
+  ENDDO
+
 end subroutine math_explicit_solver
 
 !--------------------------------------------------------------------------------------------------
